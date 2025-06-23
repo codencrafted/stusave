@@ -29,6 +29,7 @@ import { ThemeToggle } from '@/components/theme-toggle';
 import { CATEGORIES, findCategoryEmoji, CURRENCIES, findCurrencySymbol, findCategoryIcon } from '@/lib/constants';
 import type { Category, Spending, Currency, CreditDebitRecord, LendBorrowStatus, LendBorrowType } from '@/lib/types';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Badge } from '@/components/ui/badge';
 
 const spendingSchema = z.object({
   amount: z.coerce.number().positive("Amount must be positive"),
@@ -329,7 +330,7 @@ export default function StuSaveApp() {
                     <motion.div 
                         className="flex flex-col items-center justify-center gap-1 z-10"
                         animate={{ y: activeTab === 'dashboard' ? -8 : 0, scale: activeTab === 'dashboard' ? 1.1 : 1 }}
-                        transition={{ type: "spring", stiffness: 400, damping: 15 }}
+                        transition={{ type: "spring", stiffness: 300, damping: 12 }}
                     >
                         <LayoutDashboard />
                         <span className="text-xs">Dashboard</span>
@@ -339,7 +340,7 @@ export default function StuSaveApp() {
                     <motion.div 
                         className="flex flex-col items-center justify-center gap-1 z-10"
                         animate={{ y: activeTab === 'spendings' ? -8 : 0, scale: activeTab === 'spendings' ? 1.1 : 1 }}
-                        transition={{ type: "spring", stiffness: 400, damping: 15 }}
+                        transition={{ type: "spring", stiffness: 300, damping: 12 }}
                     >
                         <Wallet />
                         <span className="text-xs">Spendings</span>
@@ -418,7 +419,7 @@ export default function StuSaveApp() {
                     <motion.div 
                         className="flex flex-col items-center justify-center gap-1 z-10"
                         animate={{ y: activeTab === 'advisor' ? -8 : 0, scale: activeTab === 'advisor' ? 1.1 : 1 }}
-                        transition={{ type: "spring", stiffness: 400, damping: 15 }}
+                        transition={{ type: "spring", stiffness: 300, damping: 12 }}
                     >
                         <Sparkles />
                         <span className="text-xs">AI Advisor</span>
@@ -428,7 +429,7 @@ export default function StuSaveApp() {
                     <motion.div 
                         className="flex flex-col items-center justify-center gap-1 z-10"
                         animate={{ y: activeTab === 'settings' ? -8 : 0, scale: activeTab === 'settings' ? 1.1 : 1 }}
-                        transition={{ type: "spring", stiffness: 400, damping: 15 }}
+                        transition={{ type: "spring", stiffness: 300, damping: 12 }}
                     >
                         <Settings />
                         <span className="text-xs">Settings</span>
@@ -676,43 +677,60 @@ function RecordList({ records, type, currencySymbol, onToggleStatus, onDelete }:
         return <div className="text-center py-12"><p className="text-muted-foreground">No records here. Add one to get started!</p></div>
     }
 
-    const cardColor = type === 'debit' ? "bg-primary/10 border-primary/20" : "bg-destructive/10 border-destructive/20";
-    const statusButtonColor = type === 'debit' ? "outline" : "destructive";
-
     return (
         <ScrollArea className="h-[400px]">
             <ul className="space-y-3 pr-4">
                 <AnimatePresence>
-                    {records.map(record => (
-                        <motion.li
-                            key={record.id}
-                            layout
-                            initial={{ opacity: 0, y: 20 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            exit={{ opacity: 0, x: -50, transition: { duration: 0.2 } }}
-                            className={`p-4 rounded-lg border ${cardColor} ${record.status === 'paid' ? 'opacity-50' : ''}`}
-                        >
-                            <div className="flex items-start justify-between">
-                                <div className="flex items-start gap-4">
-                                    <div className="flex flex-col items-center">
-                                       <Users size={24} />
-                                       <p className="font-bold text-lg">{record.person}</p>
-                                    </div>
-                                    <div>
-                                        <p className="font-semibold text-xl">{currencySymbol}{record.amount.toFixed(2)}</p>
-                                        <p className="text-sm text-muted-foreground">{record.purpose}</p>
-                                        <p className="text-xs text-muted-foreground mt-1">{format(new Date(record.date), 'MMM dd, yyyy')}</p>
+                    {records.map(record => {
+                        const isLent = record.type === 'debit';
+                        const isPaid = record.status === 'paid';
+                        
+                        const cardColor = isLent ? "bg-green-500/5 dark:bg-green-500/10 border-green-500/20" : "bg-red-500/5 dark:bg-red-500/10 border-red-500/20";
+                        const textColor = isLent ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400';
+                        const iconBg = isLent ? 'bg-green-500/10' : 'bg-red-500/10';
+
+                        return (
+                            <motion.li
+                                key={record.id}
+                                layout
+                                initial={{ opacity: 0, y: 20 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                exit={{ opacity: 0, x: -50, transition: { duration: 0.2 } }}
+                                className={`rounded-lg border overflow-hidden transition-all ${isPaid ? 'bg-muted/50 border-muted' : cardColor}`}
+                            >
+                                <div className="p-4">
+                                    <div className="flex items-center justify-between gap-4">
+                                        <div className="flex items-center gap-3">
+                                            <div className={`flex h-10 w-10 items-center justify-center rounded-full ${isPaid ? 'bg-muted-foreground/20' : iconBg}`}>
+                                                {isLent ? <ArrowUpRight className={`h-5 w-5 ${isPaid ? 'text-muted-foreground' : textColor}`} /> : <ArrowDownLeft className={`h-5 w-5 ${isPaid ? 'text-muted-foreground' : textColor}`} />}
+                                            </div>
+                                            <div>
+                                                <p className="font-semibold">{record.person}</p>
+                                                <p className="text-sm text-muted-foreground">{record.purpose}</p>
+                                            </div>
+                                        </div>
+                                        <div className="text-right">
+                                            <p className={`font-bold text-xl ${isPaid ? 'text-muted-foreground line-through' : textColor}`}>
+                                                {currencySymbol}{record.amount.toFixed(2)}
+                                            </p>
+                                            <p className="text-xs text-muted-foreground">{format(new Date(record.date), 'MMM dd, yyyy')}</p>
+                                        </div>
                                     </div>
                                 </div>
-                                <div className="flex flex-col items-end gap-2">
-                                     <div className="flex items-center gap-2">
-                                        <Button 
-                                          variant={record.status === 'pending' ? statusButtonColor : 'secondary'}
-                                          size="sm"
-                                          onClick={() => onToggleStatus(record.id, record.status)}
+                                
+                                <div className={`px-4 py-2 flex items-center justify-between bg-black/5 dark:bg-white/5`}>
+                                     <Badge variant="outline" className={`border-0 text-xs font-bold capitalize ${isPaid ? 'bg-green-500/20 text-green-700 dark:bg-green-500/30 dark:text-green-300' : 'bg-yellow-500/20 text-yellow-700 dark:bg-yellow-500/30 dark:text-yellow-300'}`}>
+                                        {record.status}
+                                    </Badge>
+                                    <div className="flex items-center gap-1">
+                                        <Button
+                                            size="sm"
+                                            variant="ghost"
+                                            onClick={() => onToggleStatus(record.id, record.status)}
+                                            className="text-xs"
                                         >
-                                            {record.status === 'pending' ? <XCircle size={16} className="mr-2" /> : <CheckCircle2 size={16} className="mr-2" />}
-                                            {record.status === 'pending' ? "Mark as Paid" : "Mark as Pending"}
+                                            {isPaid ? <XCircle size={14} className="mr-2" /> : <CheckCircle2 size={14} className="mr-2" />}
+                                            {isPaid ? "Mark as Pending" : "Mark as Paid"}
                                         </Button>
                                         <AlertDialog>
                                             <AlertDialogTrigger asChild>
@@ -732,13 +750,10 @@ function RecordList({ records, type, currencySymbol, onToggleStatus, onDelete }:
                                             </AlertDialogContent>
                                         </AlertDialog>
                                     </div>
-                                    <span className={`text-xs font-bold px-2 py-1 rounded-full ${record.status === 'paid' ? 'bg-green-500 text-white' : 'bg-yellow-500 text-black'}`}>
-                                        {record.status.toUpperCase()}
-                                    </span>
-                               </div>
-                            </div>
-                        </motion.li>
-                    ))}
+                                </div>
+                            </motion.li>
+                        )
+                    })}
                 </AnimatePresence>
             </ul>
         </ScrollArea>
