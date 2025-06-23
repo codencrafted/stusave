@@ -1,3 +1,4 @@
+
 "use client"
 
 import React, { useState, useMemo } from 'react';
@@ -5,7 +6,7 @@ import { useStore } from '@/hooks/use-store';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { ArrowLeftRight, LayoutDashboard, PlusCircle, Settings, Sparkles, Target, Trash2, HandCoins, Users, CheckCircle2, XCircle, Bell, Lightbulb } from 'lucide-react';
+import { ArrowLeftRight, LayoutDashboard, PlusCircle, Settings, Sparkles, Target, Trash2, HandCoins, Users, CheckCircle2, XCircle, Bell, Lightbulb, ScanLine } from 'lucide-react';
 import { format, startOfWeek, startOfMonth, isWithinInterval } from 'date-fns';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -288,69 +289,72 @@ export default function StuSaveApp() {
                         <CardTitle>Transaction History</CardTitle>
                         <CardDescription>All your logged expenses.</CardDescription>
                     </div>
-                    <Dialog open={isAddTransactionOpen} onOpenChange={setAddTransactionOpen}>
-                      <DialogTrigger asChild>
-                        <Button><PlusCircle className="mr-2"/> Add Transaction</Button>
-                      </DialogTrigger>
-                      <DialogContent className="sm:max-w-md">
-                        <DialogHeader>
-                          <DialogTitle>Add a New Transaction</DialogTitle>
-                           <DialogDescription>
-                            Enter the details for your new expense record.
-                          </DialogDescription>
-                        </DialogHeader>
-                        <form onSubmit={transactionForm.handleSubmit(handleAddTransaction)} className="space-y-4 pt-2">
-                           <div className="grid grid-cols-2 gap-4">
-                             <div className="space-y-2">
-                              <Label htmlFor="amount">Amount ({currencySymbol})</Label>
-                              <Input id="amount" type="number" placeholder="0.00" {...transactionForm.register("amount")} />
-                              {transactionForm.formState.errors.amount && <p className="text-destructive text-sm">{transactionForm.formState.errors.amount.message}</p>}
-                            </div>
-                            <div className="space-y-2">
-                               <Label htmlFor="date">Date</Label>
-                               <Input id="date" type="date" {...transactionForm.register("date")} />
-                               {transactionForm.formState.errors.date && <p className="text-destructive text-sm">{transactionForm.formState.errors.date.message}</p>}
+                    <div className="flex items-center gap-2">
+                      <Button variant="outline"><ScanLine className="mr-2 h-4 w-4"/> Scan Spend</Button>
+                      <Dialog open={isAddTransactionOpen} onOpenChange={setAddTransactionOpen}>
+                        <DialogTrigger asChild>
+                          <Button><PlusCircle className="mr-2 h-4 w-4"/> Add Transaction</Button>
+                        </DialogTrigger>
+                        <DialogContent className="sm:max-w-md">
+                          <DialogHeader>
+                            <DialogTitle>Add a New Transaction</DialogTitle>
+                             <DialogDescription>
+                              Enter the details for your new expense record.
+                            </DialogDescription>
+                          </DialogHeader>
+                          <form onSubmit={transactionForm.handleSubmit(handleAddTransaction)} className="space-y-4 pt-2">
+                             <div className="grid grid-cols-2 gap-4">
+                               <div className="space-y-2">
+                                <Label htmlFor="amount">Amount ({currencySymbol})</Label>
+                                <Input id="amount" type="number" placeholder="0.00" {...transactionForm.register("amount")} />
+                                {transactionForm.formState.errors.amount && <p className="text-destructive text-sm">{transactionForm.formState.errors.amount.message}</p>}
+                              </div>
+                              <div className="space-y-2">
+                                 <Label htmlFor="date">Date</Label>
+                                 <Input id="date" type="date" {...transactionForm.register("date")} />
+                                 {transactionForm.formState.errors.date && <p className="text-destructive text-sm">{transactionForm.formState.errors.date.message}</p>}
+                               </div>
                              </div>
-                           </div>
-                           <div className="space-y-2">
-                            <Label htmlFor="description">Description</Label>
-                            <Input id="description" placeholder="e.g. Lunch with colleagues" {...transactionForm.register("description")} />
-                            {transactionForm.formState.errors.description && <p className="text-destructive text-sm">{transactionForm.formState.errors.description.message}</p>}
-                          </div>
-                           <div className="space-y-2">
-                            <Label htmlFor="category">Category</Label>
-                            <Controller
-                                control={transactionForm.control}
-                                name="category"
-                                render={({ field }) => (
-                                    <Select onValueChange={field.onChange} defaultValue={field.value}>
-                                        <SelectTrigger><SelectValue placeholder="Select a category" /></SelectTrigger>
-                                        <SelectContent>
-                                            {CATEGORIES.map(c => {
-                                              const Icon = c.icon;
-                                              return (
-                                                <SelectItem key={c.name} value={c.name}>
-                                                  <div className="flex items-center gap-3">
-                                                    <Icon className="h-4 w-4 text-muted-foreground" />
-                                                    <span>{c.name}</span>
-                                                  </div>
-                                                </SelectItem>
-                                              )
-                                            })}
-                                        </SelectContent>
-                                    </Select>
-                                )} />
-                            {transactionForm.formState.errors.category && <p className="text-destructive text-sm">{transactionForm.formState.errors.category.message}</p>}
-                           </div>
-                           <DialogFooter className="pt-4">
-                             <DialogClose asChild>
-                               <Button type="button" variant="outline">Cancel</Button>
-                             </DialogClose>
-                             <Button type="submit">Save Transaction</Button>
-                           </DialogFooter>
-                        </form>
-                      </DialogContent>
-                    </Dialog>
+                             <div className="space-y-2">
+                              <Label htmlFor="description">Description</Label>
+                              <Input id="description" placeholder="e.g. Lunch with colleagues" {...transactionForm.register("description")} />
+                              {transactionForm.formState.errors.description && <p className="text-destructive text-sm">{transactionForm.formState.errors.description.message}</p>}
+                            </div>
+                             <div className="space-y-2">
+                              <Label htmlFor="category">Category</Label>
+                              <Controller
+                                  control={transactionForm.control}
+                                  name="category"
+                                  render={({ field }) => (
+                                      <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                          <SelectTrigger><SelectValue placeholder="Select a category" /></SelectTrigger>
+                                          <SelectContent>
+                                              {CATEGORIES.map(c => {
+                                                const Icon = c.icon;
+                                                return (
+                                                  <SelectItem key={c.name} value={c.name}>
+                                                    <div className="flex items-center gap-3">
+                                                      <Icon className="h-4 w-4 text-muted-foreground" />
+                                                      <span>{c.name}</span>
+                                                    </div>
+                                                  </SelectItem>
+                                                )
+                                              })}
+                                          </SelectContent>
+                                      </Select>
+                                  )} />
+                              {transactionForm.formState.errors.category && <p className="text-destructive text-sm">{transactionForm.formState.errors.category.message}</p>}
+                             </div>
+                             <DialogFooter className="pt-4">
+                               <DialogClose asChild>
+                                 <Button type="button" variant="outline">Cancel</Button>
+                               </DialogClose>
+                               <Button type="submit">Save Transaction</Button>
+                             </DialogFooter>
+                          </form>
+                        </DialogContent>
+                      </Dialog>
+                    </div>
                 </CardHeader>
                 <CardContent>
                    <TransactionList transactions={state.transactions} onDelete={handleDeleteTransaction} currencySymbol={currencySymbol}/>
