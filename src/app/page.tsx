@@ -6,7 +6,7 @@ import { useStore } from '@/hooks/use-store';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { ArrowLeftRight, LayoutDashboard, PlusCircle, Settings, Sparkles, Target, Trash2, HandCoins, Users, CheckCircle2, XCircle, Bell, Lightbulb, ScanLine } from 'lucide-react';
+import { ArrowLeftRight, LayoutDashboard, PlusCircle, Settings, Sparkles, Target, Trash2, HandCoins, Users, CheckCircle2, XCircle, Bell, Lightbulb } from 'lucide-react';
 import { format, startOfWeek, startOfMonth, isWithinInterval } from 'date-fns';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -290,7 +290,6 @@ export default function StuSaveApp() {
                         <CardDescription>All your logged expenses.</CardDescription>
                     </div>
                     <div className="flex items-center gap-2">
-                      <Button variant="outline"><ScanLine className="mr-2 h-4 w-4"/> Scan Spend</Button>
                       <Dialog open={isAddTransactionOpen} onOpenChange={setAddTransactionOpen}>
                         <DialogTrigger asChild>
                           <Button><PlusCircle className="mr-2 h-4 w-4"/> Add Transaction</Button>
