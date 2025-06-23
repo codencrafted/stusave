@@ -11,12 +11,6 @@ export interface Spending {
   date: string;
 }
 
-export interface SavingsGoal {
-  name: string;
-  targetAmount: number;
-  savedAmount: number;
-}
-
 export interface CreditDebitRecord {
     id: string;
     type: LendBorrowType;

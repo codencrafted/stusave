@@ -6,7 +6,7 @@ import { useStore } from '@/hooks/use-store';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { ArrowLeftRight, LayoutDashboard, PlusCircle, Settings, Sparkles, Target, Trash2, HandCoins, Users, CheckCircle2, XCircle, Bell, Lightbulb, ArrowUpRight, ArrowDownLeft } from 'lucide-react';
+import { ArrowLeftRight, LayoutDashboard, PlusCircle, Settings, Sparkles, PiggyBank, Trash2, HandCoins, Users, CheckCircle2, XCircle, Bell, Lightbulb, ArrowUpRight, ArrowDownLeft } from 'lucide-react';
 import { format, startOfWeek, startOfMonth, isWithinInterval } from 'date-fns';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -42,12 +42,6 @@ const financesSchema = z.object({
     budget: z.coerce.number().min(0, "Budget must be non-negative"),
 });
 
-const goalSchema = z.object({
-    name: z.string().min(1, "Goal name is required"),
-    targetAmount: z.coerce.number().positive("Target amount must be positive"),
-    savedAmount: z.coerce.number().min(0, "Saved amount must be non-negative"),
-});
-
 const lendBorrowSchema = z.object({
   type: z.enum(['credit', 'debit']),
   person: z.string().min(1, "Person's name is required"),
@@ -75,11 +69,6 @@ export default function StuSaveApp() {
     defaultValues: { income: state.income, budget: state.budget },
   });
 
-  const goalForm = useForm<z.infer<typeof goalSchema>>({
-    resolver: zodResolver(goalSchema),
-    defaultValues: state.goal,
-  });
-
   // Calculations
   const totalExpenses = useMemo(() => state.spendings.reduce((sum, t) => sum + t.amount, 0), [state.spendings]);
   const balance = useMemo(() => state.income - totalExpenses, [state.income, totalExpenses]);
@@ -94,7 +83,6 @@ export default function StuSaveApp() {
   
   const budgetRemaining = useMemo(() => state.budget - monthlyExpenses, [state.budget, monthlyExpenses]);
   const budgetProgress = useMemo(() => (state.budget > 0 ? (monthlyExpenses / state.budget) * 100 : 0), [state.budget, monthlyExpenses]);
-  const goalProgress = useMemo(() => (state.goal.targetAmount > 0 ? (state.goal.savedAmount / state.goal.targetAmount) * 100 : 0), [state.goal]);
 
   const { totalLent, totalBorrowed, netCreditDebit, pendingDebts } = useMemo(() => {
     const lent = state.lendBorrow
@@ -126,11 +114,6 @@ export default function StuSaveApp() {
     toast({ title: "Success!", description: "Income and budget updated." });
   };
 
-  const handleSetGoal = (values: z.infer<typeof goalSchema>) => {
-    dispatch({ type: 'SET_GOAL', payload: values });
-    toast({ title: "Success!", description: "Savings goal updated." });
-  };
-
   const handleSetCurrency = (currencyCode: Currency) => {
     dispatch({ type: 'SET_CURRENCY', payload: currencyCode });
     toast({ title: "Success!", description: `Currency set to ${currencyCode}` });
@@ -156,9 +139,9 @@ export default function StuSaveApp() {
       <Tabs value={activeTab} onValueChange={setActiveTab} className="relative min-h-screen w-full">
         <main className="w-full max-w-4xl mx-auto px-4 pt-8 pb-28 sm:pb-24">
           <TabsContent value="dashboard">
-            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+            <div className="grid gap-6 md:grid-cols-2">
                {pendingDebts.length > 0 && (
-                <Card className="md:col-span-2 lg:col-span-3 bg-destructive/10 border-destructive/20">
+                <Card className="md:col-span-2 bg-destructive/10 border-destructive/20">
                   <CardHeader className="flex flex-row items-center gap-4">
                     <Bell className="text-destructive" />
                     <div>
@@ -175,7 +158,7 @@ export default function StuSaveApp() {
                   </CardContent>
                 </Card>
               )}
-              <Card className="lg:col-span-1">
+              <Card>
                 <CardHeader>
                   <CardTitle>Balance</CardTitle>
                   <CardDescription>Income - Total Expenses</CardDescription>
@@ -184,7 +167,7 @@ export default function StuSaveApp() {
                   <p className="text-4xl font-bold flex items-center"><span className="mr-2 text-3xl">{currencySymbol}</span>{balance.toFixed(2)}</p>
                 </CardContent>
               </Card>
-               <Card className="lg:col-span-1">
+               <Card>
                 <CardHeader>
                   <CardTitle>This Month's Budget</CardTitle>
                   <CardDescription>You've spent {currencySymbol}{monthlyExpenses.toFixed(2)} so far.</CardDescription>
@@ -194,18 +177,7 @@ export default function StuSaveApp() {
                     <Progress value={budgetProgress} className="mt-4 h-3" />
                 </CardContent>
               </Card>
-               <Card className="lg:col-span-1">
-                <CardHeader>
-                  <CardTitle>Savings Goal</CardTitle>
-                  <CardDescription>{state.goal.name}</CardDescription>
-                </CardHeader>
-                <CardContent>
-                   <p className="text-3xl font-bold flex items-center"><span className="mr-2 text-2xl">{currencySymbol}</span>{state.goal.savedAmount.toFixed(2)}</p>
-                   <p className="text-sm text-muted-foreground">out of {currencySymbol}{state.goal.targetAmount.toFixed(2)}</p>
-                   <Progress value={goalProgress} className="mt-2 h-3" />
-                </CardContent>
-              </Card>
-              <Card className="md:col-span-2 lg:col-span-3">
+              <Card className="md:col-span-2">
                 <CardHeader>
                   <CardTitle>Spending Breakdown</CardTitle>
                   <CardDescription>How you're spending your money this month.</CardDescription>
@@ -214,7 +186,7 @@ export default function StuSaveApp() {
                   <CategoryPieChart spendings={state.spendings.filter(t => isWithinInterval(new Date(t.date), { start: startOfMonth(new Date()), end: new Date() }))} />
                 </CardContent>
               </Card>
-              <Card className="md:col-span-2 lg:col-span-3">
+              <Card className="md:col-span-2">
                 <CardHeader>
                   <CardTitle>Lend & Borrow Summary</CardTitle>
                   <CardDescription>Your current pending balances with friends.</CardDescription>
@@ -320,51 +292,26 @@ export default function StuSaveApp() {
             <LendBorrowView currencySymbol={currencySymbol} />
           </TabsContent>
 
-          <TabsContent value="goals">
-            <div className="grid gap-6 md:grid-cols-2">
-                <Card>
-                    <CardHeader>
-                        <CardTitle>Finances</CardTitle>
-                        <CardDescription>Set your monthly income and budget.</CardDescription>
-                    </CardHeader>
-                    <CardContent>
-                        <form onSubmit={financesForm.handleSubmit(handleSetFinances)} className="space-y-4">
-                            <div className="space-y-2">
-                                <Label htmlFor="income">Monthly Income ({currencySymbol})</Label>
-                                <Input id="income" type="number" {...financesForm.register("income")} />
-                            </div>
-                            <div className="space-y-2">
-                                <Label htmlFor="budget">Monthly Budget ({currencySymbol})</Label>
-                                <Input id="budget" type="number" {...financesForm.register("budget")} />
-                            </div>
-                            <Button type="submit">Save Finances</Button>
-                        </form>
-                    </CardContent>
-                </Card>
-                <Card>
-                    <CardHeader>
-                        <CardTitle>Savings Goal</CardTitle>
-                        <CardDescription>Define your current savings goal.</CardDescription>
-                    </CardHeader>
-                    <CardContent>
-                        <form onSubmit={goalForm.handleSubmit(handleSetGoal)} className="space-y-4">
-                            <div className="space-y-2">
-                                <Label htmlFor="goalName">Goal Name</Label>
-                                <Input id="goalName" {...goalForm.register("name")} />
-                            </div>
-                            <div className="space-y-2">
-                                <Label htmlFor="targetAmount">Target Amount ({currencySymbol})</Label>
-                                <Input id="targetAmount" type="number" {...goalForm.register("targetAmount")} />
-                            </div>
-                             <div className="space-y-2">
-                                <Label htmlFor="savedAmount">Currently Saved ({currencySymbol})</Label>
-                                <Input id="savedAmount" type="number" {...goalForm.register("savedAmount")} />
-                            </div>
-                            <Button type="submit">Set Goal</Button>
-                        </form>
-                    </CardContent>
-                </Card>
-            </div>
+          <TabsContent value="budget">
+            <Card>
+                <CardHeader>
+                    <CardTitle>Finances</CardTitle>
+                    <CardDescription>Set your monthly income and budget.</CardDescription>
+                </CardHeader>
+                <CardContent>
+                    <form onSubmit={financesForm.handleSubmit(handleSetFinances)} className="space-y-4">
+                        <div className="space-y-2">
+                            <Label htmlFor="income">Monthly Income ({currencySymbol})</Label>
+                            <Input id="income" type="number" {...financesForm.register("income")} />
+                        </div>
+                        <div className="space-y-2">
+                            <Label htmlFor="budget">Monthly Budget ({currencySymbol})</Label>
+                            <Input id="budget" type="number" {...financesForm.register("budget")} />
+                        </div>
+                        <Button type="submit">Save Finances</Button>
+                    </form>
+                </CardContent>
+            </Card>
           </TabsContent>
 
           <TabsContent value="advisor">
@@ -441,10 +388,10 @@ export default function StuSaveApp() {
                     <motion.div layoutId="active-tab-indicator" className="absolute inset-0 rounded-md bg-card shadow-sm" transition={{ type: "spring", stiffness: 350, damping: 30 }}/>
                 )}
                 </TabsTrigger>
-                <TabsTrigger value="goals" className="relative flex flex-col items-center justify-center gap-1 p-2 h-auto">
-                <Target className="z-10" />
-                <span className="z-10 text-xs">Goals</span>
-                {activeTab === 'goals' && (
+                <TabsTrigger value="budget" className="relative flex flex-col items-center justify-center gap-1 p-2 h-auto">
+                <PiggyBank className="z-10" />
+                <span className="z-10 text-xs">Budget</span>
+                {activeTab === 'budget' && (
                     <motion.div layoutId="active-tab-indicator" className="absolute inset-0 rounded-md bg-card shadow-sm" transition={{ type: "spring", stiffness: 350, damping: 30 }}/>
                 )}
                 </TabsTrigger>
@@ -866,9 +813,3 @@ function AdvisorView({ currencySymbol }: { currencySymbol: string }) {
         </Card>
     );
 }
-
-    
-
-    
-
-    

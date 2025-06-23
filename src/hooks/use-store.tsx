@@ -1,13 +1,12 @@
 "use client"
 
 import React, { createContext, useContext, useReducer, useEffect, type ReactNode } from 'react';
-import type { Spending, SavingsGoal, Currency, CreditDebitRecord, LendBorrowStatus } from '@/lib/types';
+import type { Spending, Currency, CreditDebitRecord, LendBorrowStatus } from '@/lib/types';
 
 interface StoreState {
   income: number;
   budget: number;
   spendings: Spending[];
-  goal: SavingsGoal;
   currency: Currency;
   lendBorrow: CreditDebitRecord[];
 }
@@ -16,7 +15,6 @@ type Action =
   | { type: 'ADD_SPENDING'; payload: Spending }
   | { type: 'DELETE_SPENDING'; payload: string }
   | { type: 'SET_FINANCES'; payload: { income: number; budget: number } }
-  | { type: 'SET_GOAL'; payload: SavingsGoal }
   | { type: 'SET_CURRENCY'; payload: Currency }
   | { type: 'ADD_LEND_BORROW'; payload: CreditDebitRecord }
   | { type: 'UPDATE_LEND_BORROW_STATUS'; payload: { id: string; status: LendBorrowStatus } }
@@ -28,7 +26,6 @@ const initialState: StoreState = {
   income: 5000,
   budget: 3000,
   spendings: [],
-  goal: { name: 'New Laptop', targetAmount: 10000, savedAmount: 0 },
   currency: 'INR',
   lendBorrow: [],
 };
@@ -41,8 +38,6 @@ const storeReducer = (state: StoreState, action: Action): StoreState => {
       return { ...state, spendings: state.spendings.filter(t => t.id !== action.payload) };
     case 'SET_FINANCES':
       return { ...state, income: action.payload.income, budget: action.payload.budget };
-    case 'SET_GOAL':
-      return { ...state, goal: action.payload };
     case 'SET_CURRENCY':
       return { ...state, currency: action.payload };
     case 'ADD_LEND_BORROW':
