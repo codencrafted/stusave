@@ -327,24 +327,32 @@ export default function StuSaveApp() {
         <footer className="fixed bottom-0 left-0 right-0 z-50 border-t bg-background/95 backdrop-blur-sm">
             <TabsList className="grid h-auto w-full max-w-4xl grid-cols-5 mx-auto p-1 text-muted-foreground bg-transparent rounded-none">
                 <TabsTrigger value="dashboard" className="relative flex flex-col items-center justify-center gap-1 p-2 h-auto data-[state=active]:text-primary">
-                    <motion.div 
-                        className="flex flex-col items-center justify-center gap-1 z-10"
-                        animate={{ y: activeTab === 'dashboard' ? -8 : 0, scale: activeTab === 'dashboard' ? 1.1 : 1 }}
-                        transition={{ type: "spring", stiffness: 300, damping: 12 }}
-                    >
+                    <div className="relative z-10 flex flex-col items-center justify-center gap-1">
                         <LayoutDashboard />
                         <span className="text-xs">Dashboard</span>
-                    </motion.div>
+                    </div>
+                    {activeTab === 'dashboard' && (
+                        <motion.div
+                            layoutId="active-nav-bubble"
+                            className="absolute z-0 inset-0 bg-primary/10"
+                            style={{ borderRadius: 'var(--radius)' }}
+                            transition={{ type: 'spring', bounce: 0.2, duration: 0.6 }}
+                        />
+                    )}
                 </TabsTrigger>
                 <TabsTrigger value="spendings" className="relative flex flex-col items-center justify-center gap-1 p-2 h-auto data-[state=active]:text-primary">
-                    <motion.div 
-                        className="flex flex-col items-center justify-center gap-1 z-10"
-                        animate={{ y: activeTab === 'spendings' ? -8 : 0, scale: activeTab === 'spendings' ? 1.1 : 1 }}
-                        transition={{ type: "spring", stiffness: 300, damping: 12 }}
-                    >
+                    <div className="relative z-10 flex flex-col items-center justify-center gap-1">
                         <Wallet />
                         <span className="text-xs">Spendings</span>
-                    </motion.div>
+                    </div>
+                    {activeTab === 'spendings' && (
+                        <motion.div
+                            layoutId="active-nav-bubble"
+                            className="absolute z-0 inset-0 bg-primary/10"
+                            style={{ borderRadius: 'var(--radius)' }}
+                            transition={{ type: 'spring', bounce: 0.2, duration: 0.6 }}
+                        />
+                    )}
                 </TabsTrigger>
 
                 <div className="flex items-center justify-center">
@@ -416,24 +424,32 @@ export default function StuSaveApp() {
                 </div>
 
                 <TabsTrigger value="advisor" className="relative flex flex-col items-center justify-center gap-1 p-2 h-auto data-[state=active]:text-primary">
-                    <motion.div 
-                        className="flex flex-col items-center justify-center gap-1 z-10"
-                        animate={{ y: activeTab === 'advisor' ? -8 : 0, scale: activeTab === 'advisor' ? 1.1 : 1 }}
-                        transition={{ type: "spring", stiffness: 300, damping: 12 }}
-                    >
+                    <div className="relative z-10 flex flex-col items-center justify-center gap-1">
                         <Sparkles />
                         <span className="text-xs">AI Advisor</span>
-                    </motion.div>
+                    </div>
+                    {activeTab === 'advisor' && (
+                        <motion.div
+                            layoutId="active-nav-bubble"
+                            className="absolute z-0 inset-0 bg-primary/10"
+                            style={{ borderRadius: 'var(--radius)' }}
+                            transition={{ type: 'spring', bounce: 0.2, duration: 0.6 }}
+                        />
+                    )}
                 </TabsTrigger>
                 <TabsTrigger value="settings" className="relative flex flex-col items-center justify-center gap-1 p-2 h-auto data-[state=active]:text-primary">
-                    <motion.div 
-                        className="flex flex-col items-center justify-center gap-1 z-10"
-                        animate={{ y: activeTab === 'settings' ? -8 : 0, scale: activeTab === 'settings' ? 1.1 : 1 }}
-                        transition={{ type: "spring", stiffness: 300, damping: 12 }}
-                    >
+                    <div className="relative z-10 flex flex-col items-center justify-center gap-1">
                         <Settings />
                         <span className="text-xs">Settings</span>
-                    </motion.div>
+                    </div>
+                    {activeTab === 'settings' && (
+                        <motion.div
+                            layoutId="active-nav-bubble"
+                            className="absolute z-0 inset-0 bg-primary/10"
+                            style={{ borderRadius: 'var(--radius)' }}
+                            transition={{ type: 'spring', bounce: 0.2, duration: 0.6 }}
+                        />
+                    )}
                 </TabsTrigger>
             </TabsList>
         </footer>
@@ -857,3 +873,4 @@ function AdvisorView({ currencySymbol }: { currencySymbol: string }) {
     
 
     
+
