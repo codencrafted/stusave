@@ -433,7 +433,7 @@ export default function StuSaveApp() {
         </main>
         
         <footer className="fixed bottom-0 left-0 right-0 z-50 border-t bg-background/95 backdrop-blur-sm">
-            <TabsList className="grid h-auto w-full max-w-4xl grid-cols-3 sm:grid-cols-6 mx-auto bg-transparent p-1 text-muted-foreground">
+            <TabsList className="grid h-auto w-full max-w-4xl grid-cols-5 mx-auto bg-transparent p-1 text-muted-foreground">
                 <TabsTrigger value="dashboard" className="relative flex flex-col items-center justify-center gap-1 p-2 h-auto">
                 <LayoutDashboard className="z-10" />
                 <span className="z-10 text-xs">Dashboard</span>
@@ -441,8 +441,15 @@ export default function StuSaveApp() {
                     <motion.div layoutId="active-tab-indicator" className="absolute inset-0 rounded-md bg-card shadow-sm" transition={{ type: "spring", stiffness: 350, damping: 30 }}/>
                 )}
                 </TabsTrigger>
+                <TabsTrigger value="goals" className="relative flex flex-col items-center justify-center gap-1 p-2 h-auto">
+                <Target className="z-10" />
+                <span className="z-10 text-xs">Goals</span>
+                {activeTab === 'goals' && (
+                    <motion.div layoutId="active-tab-indicator" className="absolute inset-0 rounded-md bg-card shadow-sm" transition={{ type: "spring", stiffness: 350, damping: 30 }}/>
+                )}
+                </TabsTrigger>
                 <TabsTrigger value="spendings" className="relative flex flex-col items-center justify-center gap-1 p-2 h-auto">
-                <ArrowLeftRight className="z-10" />
+                <PlusCircle className="z-10 h-7 w-7 text-primary" />
                 <span className="z-10 text-xs">Spendings</span>
                 {activeTab === 'spendings' && (
                     <motion.div layoutId="active-tab-indicator" className="absolute inset-0 rounded-md bg-card shadow-sm" transition={{ type: "spring", stiffness: 350, damping: 30 }}/>
@@ -455,24 +462,10 @@ export default function StuSaveApp() {
                     <motion.div layoutId="active-tab-indicator" className="absolute inset-0 rounded-md bg-card shadow-sm" transition={{ type: "spring", stiffness: 350, damping: 30 }}/>
                 )}
                 </TabsTrigger>
-                <TabsTrigger value="goals" className="relative flex flex-col items-center justify-center gap-1 p-2 h-auto">
-                <Target className="z-10" />
-                <span className="z-10 text-xs">Goals & Budget</span>
-                {activeTab === 'goals' && (
-                    <motion.div layoutId="active-tab-indicator" className="absolute inset-0 rounded-md bg-card shadow-sm" transition={{ type: "spring", stiffness: 350, damping: 30 }}/>
-                )}
-                </TabsTrigger>
                 <TabsTrigger value="advisor" className="relative flex flex-col items-center justify-center gap-1 p-2 h-auto">
                 <Sparkles className="z-10" />
                 <span className="z-10 text-xs">AI Advisor</span>
                 {activeTab === 'advisor' && (
-                    <motion.div layoutId="active-tab-indicator" className="absolute inset-0 rounded-md bg-card shadow-sm" transition={{ type: "spring", stiffness: 350, damping: 30 }}/>
-                )}
-                </TabsTrigger>
-                <TabsTrigger value="settings" className="relative flex flex-col items-center justify-center gap-1 p-2 h-auto">
-                <Settings className="z-10" />
-                <span className="z-10 text-xs">Settings</span>
-                {activeTab === 'settings' && (
                     <motion.div layoutId="active-tab-indicator" className="absolute inset-0 rounded-md bg-card shadow-sm" transition={{ type: "spring", stiffness: 350, damping: 30 }}/>
                 )}
                 </TabsTrigger>
@@ -873,6 +866,8 @@ function AdvisorView({ currencySymbol }: { currencySymbol: string }) {
         </Card>
     );
 }
+
+    
 
     
 
