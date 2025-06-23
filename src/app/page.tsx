@@ -28,6 +28,7 @@ import { ThemeToggle } from '@/components/theme-toggle';
 import { CATEGORIES, findCategoryEmoji, CURRENCIES, findCurrencySymbol } from '@/lib/constants';
 import type { Category, Transaction, Currency, CreditDebitRecord, LendBorrowStatus, LendBorrowType } from '@/lib/types';
 import { Skeleton } from '@/components/ui/skeleton';
+import { StuSaveLogo } from '@/components/logo';
 
 const transactionSchema = z.object({
   amount: z.coerce.number().positive("Amount must be positive"),
@@ -152,8 +153,8 @@ export default function StuSaveApp() {
   return (
     <div className="min-h-screen bg-background text-foreground flex flex-col items-center p-4 font-body">
       <main className="w-full max-w-4xl mx-auto">
-        <header className="text-center mb-8">
-          <h1 className="text-4xl md:text-5xl font-headline font-bold text-primary dark:text-primary">StuSave</h1>
+        <header className="flex flex-col items-center text-center mb-8">
+          <StuSaveLogo />
           <p className="text-muted-foreground mt-2">Your Smart Student Money Manager</p>
         </header>
 
