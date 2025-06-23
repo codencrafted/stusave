@@ -155,7 +155,6 @@ export default function StuSaveApp() {
       <main className="w-full max-w-4xl mx-auto">
         <header className="flex flex-col items-center text-center mb-8">
           <StuSaveLogo />
-          <p className="text-muted-foreground mt-2">Your Smart Student Money Manager</p>
         </header>
 
         <Tabs defaultValue="dashboard" className="w-full">
