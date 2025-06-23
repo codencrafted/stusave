@@ -328,8 +328,8 @@ export default function StuSaveApp() {
                 <TabsTrigger value="dashboard" className="relative flex flex-col items-center justify-center gap-1 p-2 h-auto data-[state=active]:text-primary">
                     <motion.div 
                         className="flex flex-col items-center justify-center gap-1 z-10"
-                        animate={{ y: activeTab === 'dashboard' ? -8 : 0, scale: activeTab === 'dashboard' ? 1.2 : 1, rotate: activeTab === 'dashboard' ? -10 : 0 }}
-                        transition={{ type: "spring", stiffness: 300, damping: 10 }}
+                        animate={{ y: activeTab === 'dashboard' ? -8 : 0, scale: activeTab === 'dashboard' ? 1.1 : 1 }}
+                        transition={{ type: "spring", stiffness: 400, damping: 15 }}
                     >
                         <LayoutDashboard />
                         <span className="text-xs">Dashboard</span>
@@ -338,8 +338,8 @@ export default function StuSaveApp() {
                 <TabsTrigger value="spendings" className="relative flex flex-col items-center justify-center gap-1 p-2 h-auto data-[state=active]:text-primary">
                     <motion.div 
                         className="flex flex-col items-center justify-center gap-1 z-10"
-                        animate={{ y: activeTab === 'spendings' ? -8 : 0, scale: activeTab === 'spendings' ? 1.2 : 1, rotate: activeTab === 'spendings' ? -10 : 0 }}
-                        transition={{ type: "spring", stiffness: 300, damping: 10 }}
+                        animate={{ y: activeTab === 'spendings' ? -8 : 0, scale: activeTab === 'spendings' ? 1.1 : 1 }}
+                        transition={{ type: "spring", stiffness: 400, damping: 15 }}
                     >
                         <Wallet />
                         <span className="text-xs">Spendings</span>
@@ -417,8 +417,8 @@ export default function StuSaveApp() {
                 <TabsTrigger value="advisor" className="relative flex flex-col items-center justify-center gap-1 p-2 h-auto data-[state=active]:text-primary">
                     <motion.div 
                         className="flex flex-col items-center justify-center gap-1 z-10"
-                        animate={{ y: activeTab === 'advisor' ? -8 : 0, scale: activeTab === 'advisor' ? 1.2 : 1, rotate: activeTab === 'advisor' ? 10 : 0 }}
-                        transition={{ type: "spring", stiffness: 300, damping: 10 }}
+                        animate={{ y: activeTab === 'advisor' ? -8 : 0, scale: activeTab === 'advisor' ? 1.1 : 1 }}
+                        transition={{ type: "spring", stiffness: 400, damping: 15 }}
                     >
                         <Sparkles />
                         <span className="text-xs">AI Advisor</span>
@@ -427,8 +427,8 @@ export default function StuSaveApp() {
                 <TabsTrigger value="settings" className="relative flex flex-col items-center justify-center gap-1 p-2 h-auto data-[state=active]:text-primary">
                     <motion.div 
                         className="flex flex-col items-center justify-center gap-1 z-10"
-                        animate={{ y: activeTab === 'settings' ? -8 : 0, scale: activeTab === 'settings' ? 1.2 : 1, rotate: activeTab === 'settings' ? 10 : 0 }}
-                        transition={{ type: "spring", stiffness: 300, damping: 10 }}
+                        animate={{ y: activeTab === 'settings' ? -8 : 0, scale: activeTab === 'settings' ? 1.1 : 1 }}
+                        transition={{ type: "spring", stiffness: 400, damping: 15 }}
                     >
                         <Settings />
                         <span className="text-xs">Settings</span>
@@ -829,5 +829,7 @@ function AdvisorView({ currencySymbol }: { currencySymbol: string }) {
         </Card>
     );
 }
+
+    
 
     
