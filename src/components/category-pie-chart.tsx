@@ -29,7 +29,7 @@ export function CategoryPieChart({ transactions }: CategoryPieChartProps) {
     return Object.entries(categoryTotals).map(([category, total]) => ({
       category,
       total,
-      fill: `var(--color-${category.toLowerCase().replace(' ', '-')})`
+      fill: `var(--color-${category})`
     }));
   }, [transactions]);
 
@@ -38,7 +38,7 @@ export function CategoryPieChart({ transactions }: CategoryPieChartProps) {
     CATEGORIES.forEach((cat, index) => {
         config[cat.name] = {
             label: `${cat.emoji} ${cat.name}`,
-            color: `hsl(var(--chart-${(index % 5) + 1}))`
+            color: `hsl(var(--chart-${(index % 7) + 1}))`
         }
     });
     return config;
