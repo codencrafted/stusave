@@ -1,7 +1,7 @@
 
 "use client"
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useRef, useEffect } from 'react';
 import { useStore } from '@/hooks/use-store';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -56,6 +56,22 @@ export default function StuSaveApp() {
   const { toast } = useToast();
   const [isAddSpendingOpen, setAddSpendingOpen] = useState(false);
   const [activeTab, setActiveTab] = useState('dashboard');
+  
+  const navRef = useRef<HTMLElement>(null);
+  const [navWidth, setNavWidth] = useState(0);
+
+  useEffect(() => {
+    const navElement = navRef.current;
+    if (!navElement) return;
+
+    const observer = new ResizeObserver(() => {
+      setNavWidth(navElement.offsetWidth);
+    });
+
+    observer.observe(navElement);
+    return () => observer.disconnect();
+  }, []);
+
 
   const currencySymbol = useMemo(() => findCurrencySymbol(state.currency), [state.currency]);
 
@@ -134,6 +150,31 @@ export default function StuSaveApp() {
     linkElement.setAttribute('download', exportFileDefaultName);
     linkElement.click();
   };
+
+  const navTabs = useMemo(() => [
+    { name: 'dashboard', icon: LayoutDashboard, label: 'Dashboard' },
+    { name: 'spendings', icon: Wallet, label: 'Spendings' },
+    { name: 'add', icon: PlusCircle, label: 'Add' },
+    { name: 'advisor', icon: Sparkles, label: 'AI Advisor' },
+    { name: 'settings', icon: Settings, label: 'Settings' },
+  ], []);
+
+  const activeIndex = useMemo(() => navTabs.findIndex(t => t.name === activeTab), [activeTab, navTabs]);
+
+  const pathD = useMemo(() => {
+    if (navWidth === 0 || activeIndex === -1) {
+      return `M 0 20 L ${navWidth} 20 L ${navWidth} 80 L 0 80 Z`;
+    }
+    const tabWidth = navWidth / navTabs.length;
+    const curveWidth = 80;
+    const curveStart = (activeIndex * tabWidth) + (tabWidth - curveWidth) / 2;
+    const curveEnd = curveStart + curveWidth;
+    const curveCenter = curveStart + curveWidth / 2;
+    const curveDepth = 35;
+
+    return `M 0 15 L ${curveStart} 15 C ${curveStart + 10} 15, ${curveCenter - 30} ${curveDepth}, ${curveCenter} ${curveDepth} S ${curveEnd - 10} 15, ${curveEnd} 15 L ${navWidth} 15 L ${navWidth} 80 L 0 80 Z`;
+  }, [navWidth, activeIndex, navTabs.length]);
+
 
   return (
     <div className="bg-background text-foreground font-body">
@@ -324,117 +365,115 @@ export default function StuSaveApp() {
           </TabsContent>
         </main>
         
-        <footer className="fixed bottom-0 left-0 right-0 z-50 border-t bg-background/95 backdrop-blur-sm">
-            <TabsList className="grid h-auto w-full max-w-4xl grid-cols-5 mx-auto p-1 text-muted-foreground bg-transparent rounded-none">
-                <TabsTrigger value="dashboard" className="flex flex-col items-center justify-center gap-1 p-2 h-auto data-[state=active]:text-primary">
-                    <motion.div
-                        animate={{ scale: activeTab === 'dashboard' ? 1.15 : 1, y: activeTab === 'dashboard' ? -5 : 0 }}
-                        transition={{ type: 'spring', stiffness: 300, damping: 15 }}
-                        className="flex flex-col items-center justify-center gap-1"
-                    >
-                        <LayoutDashboard />
-                        <span className="text-xs">Dashboard</span>
-                    </motion.div>
-                </TabsTrigger>
-                <TabsTrigger value="spendings" className="flex flex-col items-center justify-center gap-1 p-2 h-auto data-[state=active]:text-primary">
-                    <motion.div
-                        animate={{ scale: activeTab === 'spendings' ? 1.15 : 1, y: activeTab === 'spendings' ? -5 : 0 }}
-                        transition={{ type: 'spring', stiffness: 300, damping: 15 }}
-                        className="flex flex-col items-center justify-center gap-1"
-                    >
-                        <Wallet />
-                        <span className="text-xs">Spendings</span>
-                    </motion.div>
-                </TabsTrigger>
+        <footer ref={navRef} className="fixed bottom-0 left-0 right-0 z-50 h-20 w-full max-w-4xl mx-auto">
+            <motion.svg
+                width={navWidth}
+                height="80"
+                viewBox={`0 0 ${navWidth} 80`}
+                className="absolute top-0 left-0"
+                style={{
+                  backdropFilter: 'blur(8px)',
+                  WebkitBackdropFilter: 'blur(8px)',
+                }}
+              >
+                <motion.path
+                  d={pathD}
+                  fill="hsl(var(--background) / 0.8)"
+                  stroke="hsl(var(--border) / 0.5)"
+                  strokeWidth="1"
+                  transition={{ type: 'spring', stiffness: 350, damping: 30 }}
+                />
+            </motion.svg>
+            <TabsList className="relative grid h-full w-full grid-cols-5 text-muted-foreground bg-transparent rounded-none">
+                {navTabs.map((tab) => {
+                    const isActive = activeTab === tab.name;
+                    const Icon = tab.icon;
 
-                <div className="flex items-center justify-center">
-                   <Dialog open={isAddSpendingOpen} onOpenChange={setAddSpendingOpen}>
-                      <DialogTrigger asChild>
-                         <Button size="icon" className="rounded-full h-14 w-14 shadow-lg -translate-y-4">
-                            <PlusCircle className="h-7 w-7" />
-                        </Button>
-                      </DialogTrigger>
-                      <DialogContent className="sm:max-w-md">
-                        <DialogHeader>
-                          <DialogTitle>Add a New Spending</DialogTitle>
-                           <DialogDescription>
-                            Enter the details for your new expense record.
-                          </DialogDescription>
-                        </DialogHeader>
-                        <form onSubmit={spendingForm.handleSubmit(handleAddSpending)} className="space-y-4 pt-2">
-                           <div className="grid grid-cols-2 gap-4">
-                             <div className="space-y-2">
-                              <Label htmlFor="amount">Amount ({currencySymbol})</Label>
-                              <Input id="amount" type="number" placeholder="0.00" {...spendingForm.register("amount")} />
-                              {spendingForm.formState.errors.amount && <p className="text-destructive text-sm">{spendingForm.formState.errors.amount.message}</p>}
+                    if (tab.name === 'add') {
+                        return (
+                            <div key={tab.name} className="flex items-center justify-center">
+                               <Dialog open={isAddSpendingOpen} onOpenChange={setAddSpendingOpen}>
+                                  <DialogTrigger asChild>
+                                     <Button size="icon" className="rounded-full h-14 w-14 shadow-lg -translate-y-4 bg-primary hover:bg-primary/90">
+                                        <PlusCircle className="h-7 w-7 text-primary-foreground" />
+                                    </Button>
+                                  </DialogTrigger>
+                                  <DialogContent className="sm:max-w-md">
+                                    <DialogHeader>
+                                      <DialogTitle>Add a New Spending</DialogTitle>
+                                       <DialogDescription>
+                                        Enter the details for your new expense record.
+                                      </DialogDescription>
+                                    </DialogHeader>
+                                    <form onSubmit={spendingForm.handleSubmit(handleAddSpending)} className="space-y-4 pt-2">
+                                       <div className="grid grid-cols-2 gap-4">
+                                         <div className="space-y-2">
+                                          <Label htmlFor="amount">Amount ({currencySymbol})</Label>
+                                          <Input id="amount" type="number" placeholder="0.00" {...spendingForm.register("amount")} />
+                                          {spendingForm.formState.errors.amount && <p className="text-destructive text-sm">{spendingForm.formState.errors.amount.message}</p>}
+                                        </div>
+                                        <div className="space-y-2">
+                                           <Label htmlFor="date">Date</Label>
+                                           <Input id="date" type="date" {...spendingForm.register("date")} />
+                                           {spendingForm.formState.errors.date && <p className="text-destructive text-sm">{spendingForm.formState.errors.date.message}</p>}
+                                         </div>
+                                       </div>
+                                       <div className="space-y-2">
+                                        <Label htmlFor="description">Description</Label>
+                                        <Input id="description" placeholder="e.g. Lunch with colleagues" {...spendingForm.register("description")} />
+                                        {spendingForm.formState.errors.description && <p className="text-destructive text-sm">{spendingForm.formState.errors.description.message}</p>}
+                                      </div>
+                                       <div className="space-y-2">
+                                        <Label htmlFor="category">Category</Label>
+                                        <Controller
+                                            control={spendingForm.control}
+                                            name="category"
+                                            render={({ field }) => (
+                                                <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                                    <SelectTrigger><SelectValue placeholder="Select a category" /></SelectTrigger>
+                                                    <SelectContent>
+                                                        {CATEGORIES.map(c => {
+                                                          const Icon = c.icon;
+                                                          return (
+                                                            <SelectItem key={c.name} value={c.name}>
+                                                              <div className="flex items-center gap-3">
+                                                                <Icon className="h-4 w-4 text-muted-foreground" />
+                                                                <span>{c.name}</span>
+                                                              </div>
+                                                            </SelectItem>
+                                                          )
+                                                        })}
+                                                    </SelectContent>
+                                                </Select>
+                                            )} />
+                                        {spendingForm.formState.errors.category && <p className="text-destructive text-sm">{spendingForm.formState.errors.category.message}</p>}
+                                       </div>
+                                       <DialogFooter className="pt-4">
+                                         <DialogClose asChild>
+                                           <Button type="button" variant="outline">Cancel</Button>
+                                         </DialogClose>
+                                         <Button type="submit">Save Spending</Button>
+                                       </DialogFooter>
+                                    </form>
+                                  </DialogContent>
+                                </Dialog>
                             </div>
-                            <div className="space-y-2">
-                               <Label htmlFor="date">Date</Label>
-                               <Input id="date" type="date" {...spendingForm.register("date")} />
-                               {spendingForm.formState.errors.date && <p className="text-destructive text-sm">{spendingForm.formState.errors.date.message}</p>}
-                             </div>
-                           </div>
-                           <div className="space-y-2">
-                            <Label htmlFor="description">Description</Label>
-                            <Input id="description" placeholder="e.g. Lunch with colleagues" {...spendingForm.register("description")} />
-                            {spendingForm.formState.errors.description && <p className="text-destructive text-sm">{spendingForm.formState.errors.description.message}</p>}
-                          </div>
-                           <div className="space-y-2">
-                            <Label htmlFor="category">Category</Label>
-                            <Controller
-                                control={spendingForm.control}
-                                name="category"
-                                render={({ field }) => (
-                                    <Select onValueChange={field.onChange} defaultValue={field.value}>
-                                        <SelectTrigger><SelectValue placeholder="Select a category" /></SelectTrigger>
-                                        <SelectContent>
-                                            {CATEGORIES.map(c => {
-                                              const Icon = c.icon;
-                                              return (
-                                                <SelectItem key={c.name} value={c.name}>
-                                                  <div className="flex items-center gap-3">
-                                                    <Icon className="h-4 w-4 text-muted-foreground" />
-                                                    <span>{c.name}</span>
-                                                  </div>
-                                                </SelectItem>
-                                              )
-                                            })}
-                                        </SelectContent>
-                                    </Select>
-                                )} />
-                            {spendingForm.formState.errors.category && <p className="text-destructive text-sm">{spendingForm.formState.errors.category.message}</p>}
-                           </div>
-                           <DialogFooter className="pt-4">
-                             <DialogClose asChild>
-                               <Button type="button" variant="outline">Cancel</Button>
-                             </DialogClose>
-                             <Button type="submit">Save Spending</Button>
-                           </DialogFooter>
-                        </form>
-                      </DialogContent>
-                    </Dialog>
-                </div>
+                        );
+                    }
 
-                <TabsTrigger value="advisor" className="flex flex-col items-center justify-center gap-1 p-2 h-auto data-[state=active]:text-primary">
-                    <motion.div
-                        animate={{ scale: activeTab === 'advisor' ? 1.15 : 1, y: activeTab === 'advisor' ? -5 : 0 }}
-                        transition={{ type: 'spring', stiffness: 300, damping: 15 }}
-                        className="flex flex-col items-center justify-center gap-1"
-                    >
-                        <Sparkles />
-                        <span className="text-xs">AI Advisor</span>
-                    </motion.div>
-                </TabsTrigger>
-                <TabsTrigger value="settings" className="flex flex-col items-center justify-center gap-1 p-2 h-auto data-[state=active]:text-primary">
-                    <motion.div
-                        animate={{ scale: activeTab === 'settings' ? 1.15 : 1, y: activeTab === 'settings' ? -5 : 0 }}
-                        transition={{ type: 'spring', stiffness: 300, damping: 15 }}
-                        className="flex flex-col items-center justify-center gap-1"
-                    >
-                        <Settings />
-                        <span className="text-xs">Settings</span>
-                    </motion.div>
-                </TabsTrigger>
+                    return (
+                        <TabsTrigger key={tab.name} value={tab.name!} className="flex flex-col items-center justify-center gap-1 p-2 h-full data-[state=active]:text-primary">
+                            <motion.div
+                                animate={{ y: isActive ? -12 : 0 }}
+                                transition={{ type: 'spring', stiffness: 300, damping: 20 }}
+                                className="flex flex-col items-center justify-center gap-1"
+                            >
+                                <Icon className={`transition-transform ${isActive ? 'scale-110' : 'scale-100'}`} />
+                                <span className="text-xs">{tab.label}</span>
+                            </motion.div>
+                        </TabsTrigger>
+                    );
+                })}
             </TabsList>
         </footer>
       </Tabs>
@@ -857,5 +896,6 @@ function AdvisorView({ currencySymbol }: { currencySymbol: string }) {
     
 
     
+
 
 
