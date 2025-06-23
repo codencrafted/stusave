@@ -1,7 +1,7 @@
 "use client"
 
 import React, { createContext, useContext, useReducer, useEffect, type ReactNode } from 'react';
-import type { Transaction, SavingsGoal, Currency } from '@/lib/types';
+import type { Transaction, SavingsGoal, Currency, CreditDebitRecord, LendBorrowStatus } from '@/lib/types';
 
 interface StoreState {
   income: number;
@@ -9,6 +9,7 @@ interface StoreState {
   transactions: Transaction[];
   goal: SavingsGoal;
   currency: Currency;
+  lendBorrow: CreditDebitRecord[];
 }
 
 type Action =
@@ -17,6 +18,9 @@ type Action =
   | { type: 'SET_FINANCES'; payload: { income: number; budget: number } }
   | { type: 'SET_GOAL'; payload: SavingsGoal }
   | { type: 'SET_CURRENCY'; payload: Currency }
+  | { type: 'ADD_LEND_BORROW'; payload: CreditDebitRecord }
+  | { type: 'UPDATE_LEND_BORROW_STATUS'; payload: { id: string; status: LendBorrowStatus } }
+  | { type: 'DELETE_LEND_BORROW'; payload: string }
   | { type: 'RESET_DATA' }
   | { type: 'HYDRATE'; payload: Partial<StoreState> };
 
@@ -26,6 +30,7 @@ const initialState: StoreState = {
   transactions: [],
   goal: { name: 'New Laptop', targetAmount: 10000, savedAmount: 0 },
   currency: 'INR',
+  lendBorrow: [],
 };
 
 const storeReducer = (state: StoreState, action: Action): StoreState => {
@@ -40,6 +45,19 @@ const storeReducer = (state: StoreState, action: Action): StoreState => {
       return { ...state, goal: action.payload };
     case 'SET_CURRENCY':
       return { ...state, currency: action.payload };
+    case 'ADD_LEND_BORROW':
+      return { ...state, lendBorrow: [action.payload, ...state.lendBorrow] };
+    case 'UPDATE_LEND_BORROW_STATUS':
+      return {
+        ...state,
+        lendBorrow: state.lendBorrow.map(record =>
+          record.id === action.payload.id
+            ? { ...record, status: action.payload.status }
+            : record
+        ),
+      };
+    case 'DELETE_LEND_BORROW':
+      return { ...state, lendBorrow: state.lendBorrow.filter(r => r.id !== action.payload) };
     case 'RESET_DATA':
       return initialState;
     case 'HYDRATE':

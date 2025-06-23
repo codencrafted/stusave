@@ -5,8 +5,9 @@ import { useStore } from '@/hooks/use-store';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { ArrowLeftRight, LayoutDashboard, PlusCircle, Settings, Sparkles, Target, Trash2 } from 'lucide-react';
+import { ArrowLeftRight, LayoutDashboard, PlusCircle, Settings, Sparkles, Target, Trash2, HandCoins, Users, CheckCircle2, XCircle, Bell } from 'lucide-react';
 import { format, startOfWeek, startOfMonth, isWithinInterval } from 'date-fns';
+import { motion, AnimatePresence } from 'framer-motion';
 
 import { getSmartAdvice } from '@/ai/flows/get-smart-advice';
 
@@ -18,13 +19,14 @@ import { Progress } from '@/components/ui/progress';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter, DialogClose } from '@/components/ui/dialog';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { useToast } from '@/hooks/use-toast';
 import { CategoryPieChart } from '@/components/category-pie-chart';
 import { ThemeToggle } from '@/components/theme-toggle';
 import { CATEGORIES, findCategoryEmoji, CURRENCIES, findCurrencySymbol } from '@/lib/constants';
-import type { Category, Transaction, Currency } from '@/lib/types';
+import type { Category, Transaction, Currency, CreditDebitRecord, LendBorrowStatus, LendBorrowType } from '@/lib/types';
 import { Skeleton } from '@/components/ui/skeleton';
 
 const transactionSchema = z.object({
@@ -43,6 +45,14 @@ const goalSchema = z.object({
     name: z.string().min(1, "Goal name is required"),
     targetAmount: z.coerce.number().positive("Target amount must be positive"),
     savedAmount: z.coerce.number().min(0, "Saved amount must be non-negative"),
+});
+
+const lendBorrowSchema = z.object({
+  type: z.enum(['credit', 'debit']),
+  person: z.string().min(1, "Person's name is required"),
+  amount: z.coerce.number().positive("Amount must be positive"),
+  purpose: z.string().min(1, "Purpose is required"),
+  date: z.string().min(1, "Date is required"),
 });
 
 export default function StuSaveApp() {
@@ -83,6 +93,18 @@ export default function StuSaveApp() {
   const budgetRemaining = useMemo(() => state.budget - monthlyExpenses, [state.budget, monthlyExpenses]);
   const budgetProgress = useMemo(() => (state.budget > 0 ? (monthlyExpenses / state.budget) * 100 : 0), [state.budget, monthlyExpenses]);
   const goalProgress = useMemo(() => (state.goal.targetAmount > 0 ? (state.goal.savedAmount / state.goal.targetAmount) * 100 : 0), [state.goal]);
+
+  const { totalLent, totalBorrowed, netCreditDebit, pendingDebts } = useMemo(() => {
+    const lent = state.lendBorrow
+      .filter(r => r.type === 'debit' && r.status === 'pending')
+      .reduce((sum, r) => sum + r.amount, 0);
+    const borrowed = state.lendBorrow
+      .filter(r => r.type === 'credit' && r.status === 'pending')
+      .reduce((sum, r) => sum + r.amount, 0);
+    const debts = state.lendBorrow.filter(r => r.type === 'credit' && r.status === 'pending');
+    return { totalLent: lent, totalBorrowed: borrowed, netCreditDebit: lent - borrowed, pendingDebts: debts };
+  }, [state.lendBorrow]);
+
 
   // Handlers
   const handleAddTransaction = (values: z.infer<typeof transactionSchema>) => {
@@ -136,9 +158,10 @@ export default function StuSaveApp() {
         </header>
 
         <Tabs defaultValue="dashboard" className="w-full">
-          <TabsList className="grid w-full grid-cols-2 sm:grid-cols-5 h-auto sm:h-12">
+          <TabsList className="grid w-full grid-cols-3 sm:grid-cols-6 h-auto sm:h-12">
             <TabsTrigger value="dashboard" className="flex flex-col sm:flex-row gap-2 py-2"><LayoutDashboard />Dashboard</TabsTrigger>
             <TabsTrigger value="transactions" className="flex flex-col sm:flex-row gap-2 py-2"><ArrowLeftRight />Transactions</TabsTrigger>
+            <TabsTrigger value="lendborrow" className="flex flex-col sm:flex-row gap-2 py-2"><HandCoins />Lend/Borrow</TabsTrigger>
             <TabsTrigger value="goals" className="flex flex-col sm:flex-row gap-2 py-2"><Target />Goals & Budget</TabsTrigger>
             <TabsTrigger value="advisor" className="flex flex-col sm:flex-row gap-2 py-2"><Sparkles />AI Advisor</TabsTrigger>
             <TabsTrigger value="settings" className="flex flex-col sm:flex-row gap-2 py-2"><Settings />Settings</TabsTrigger>
@@ -146,6 +169,24 @@ export default function StuSaveApp() {
 
           <TabsContent value="dashboard" className="mt-6">
             <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+               {pendingDebts.length > 0 && (
+                <Card className="md:col-span-2 lg:col-span-3 bg-destructive/10 border-destructive/20">
+                  <CardHeader className="flex flex-row items-center gap-4">
+                    <Bell className="text-destructive" />
+                    <div>
+                      <CardTitle className="text-destructive">Pending Repayments</CardTitle>
+                      <CardDescription className="text-destructive/80">You have outstanding debts to settle.</CardDescription>
+                    </div>
+                  </CardHeader>
+                  <CardContent>
+                    <ul className="space-y-1 text-sm">
+                      {pendingDebts.map(debt => (
+                        <li key={debt.id}>You still owe <span className="font-bold">{currencySymbol}{debt.amount.toFixed(2)}</span> to <span className="font-bold">{debt.person}</span>.</li>
+                      ))}
+                    </ul>
+                  </CardContent>
+                </Card>
+              )}
               <Card className="lg:col-span-1">
                 <CardHeader>
                   <CardTitle>Balance</CardTitle>
@@ -183,6 +224,26 @@ export default function StuSaveApp() {
                 </CardHeader>
                 <CardContent>
                   <CategoryPieChart transactions={state.transactions.filter(t => isWithinInterval(new Date(t.date), { start: startOfMonth(new Date()), end: new Date() }))} />
+                </CardContent>
+              </Card>
+              <Card className="md:col-span-2 lg:col-span-3">
+                <CardHeader>
+                  <CardTitle>Lend & Borrow Summary</CardTitle>
+                  <CardDescription>Your current pending balances with friends.</CardDescription>
+                </CardHeader>
+                <CardContent className="grid grid-cols-1 md:grid-cols-3 gap-4 text-center">
+                    <div>
+                        <p className="text-sm text-muted-foreground">You Lent (Pending)</p>
+                        <p className="text-2xl font-bold text-green-600">{currencySymbol}{totalLent.toFixed(2)}</p>
+                    </div>
+                    <div>
+                        <p className="text-sm text-muted-foreground">You Borrowed (Pending)</p>
+                        <p className="text-2xl font-bold text-red-600">{currencySymbol}{totalBorrowed.toFixed(2)}</p>
+                    </div>
+                     <div>
+                        <p className="text-sm text-muted-foreground">Net Balance</p>
+                        <p className={`text-2xl font-bold ${netCreditDebit >= 0 ? 'text-green-600' : 'text-red-600'}`}>{currencySymbol}{Math.abs(netCreditDebit).toFixed(2)}</p>
+                    </div>
                 </CardContent>
               </Card>
             </div>
@@ -250,6 +311,10 @@ export default function StuSaveApp() {
             </Card>
           </TabsContent>
           
+          <TabsContent value="lendborrow" className="mt-6">
+            <LendBorrowView currencySymbol={currencySymbol} />
+          </TabsContent>
+
           <TabsContent value="goals" className="mt-6">
             <div className="grid gap-6 md:grid-cols-2">
                 <Card>
@@ -442,6 +507,211 @@ function TransactionList({ transactions, onDelete, currencySymbol }: { transacti
         </div>
     )
 }
+
+function LendBorrowView({ currencySymbol }: { currencySymbol: string }) {
+    const { state, dispatch } = useStore();
+    const { toast } = useToast();
+    const [isAddLendBorrowOpen, setAddLendBorrowOpen] = useState(false);
+
+    const form = useForm<z.infer<typeof lendBorrowSchema>>({
+        resolver: zodResolver(lendBorrowSchema),
+        defaultValues: {
+            date: format(new Date(), 'yyyy-MM-dd'),
+            person: '',
+            purpose: '',
+            amount: 0,
+            type: 'debit',
+        },
+    });
+
+    const handleAddRecord = (values: z.infer<typeof lendBorrowSchema>) => {
+        dispatch({
+            type: 'ADD_LEND_BORROW',
+            payload: { ...values, id: crypto.randomUUID(), status: 'pending' },
+        });
+        toast({ title: "Success!", description: "Record added." });
+        form.reset({
+            date: format(new Date(), 'yyyy-MM-dd'),
+            person: '',
+            purpose: '',
+            amount: 0,
+            type: 'debit',
+        });
+        setAddLendBorrowOpen(false);
+    };
+
+    const handleToggleStatus = (id: string, currentStatus: LendBorrowStatus) => {
+        const newStatus = currentStatus === 'pending' ? 'paid' : 'pending';
+        dispatch({ type: 'UPDATE_LEND_BORROW_STATUS', payload: { id, status: newStatus } });
+        toast({ title: `Record marked as ${newStatus}.` });
+    };
+
+    const handleDeleteRecord = (id: string) => {
+        dispatch({ type: 'DELETE_LEND_BORROW', payload: id });
+        toast({ title: "Record Deleted", variant: 'destructive' });
+    }
+
+    const { lent, borrowed } = useMemo(() => {
+        return {
+            lent: state.lendBorrow.filter(r => r.type === 'debit'),
+            borrowed: state.lendBorrow.filter(r => r.type === 'credit'),
+        };
+    }, [state.lendBorrow]);
+
+    return (
+        <Card>
+            <CardHeader className="flex flex-row items-center justify-between">
+                <div>
+                    <CardTitle>Lend & Borrow Tracker</CardTitle>
+                    <CardDescription>Manage money shared with your friends.</CardDescription>
+                </div>
+                <Dialog open={isAddLendBorrowOpen} onOpenChange={setAddLendBorrowOpen}>
+                    <DialogTrigger asChild>
+                        <Button><PlusCircle className="mr-2"/> Add Record</Button>
+                    </DialogTrigger>
+                    <DialogContent>
+                        <DialogHeader><DialogTitle>Add a New Lend/Borrow Record</DialogTitle></DialogHeader>
+                        <form onSubmit={form.handleSubmit(handleAddRecord)} className="space-y-4">
+                            <Controller
+                                control={form.control}
+                                name="type"
+                                render={({ field }) => (
+                                    <RadioGroup onValueChange={field.onChange} defaultValue={field.value} className="grid grid-cols-2 gap-4">
+                                        <div>
+                                            <RadioGroupItem value="debit" id="debit" className="peer sr-only" />
+                                            <Label htmlFor="debit" className="flex flex-col items-center justify-between rounded-md border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary">
+                                                I Lent Money
+                                            </Label>
+                                        </div>
+                                        <div>
+                                            <RadioGroupItem value="credit" id="credit" className="peer sr-only" />
+                                            <Label htmlFor="credit" className="flex flex-col items-center justify-between rounded-md border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-destructive [&:has([data-state=checked])]:border-destructive">
+                                                I Borrowed Money
+                                            </Label>
+                                        </div>
+                                    </RadioGroup>
+                                )}
+                            />
+                            <div className="space-y-2">
+                                <Label htmlFor="person">Person's Name</Label>
+                                <Input id="person" {...form.register("person")} />
+                                {form.formState.errors.person && <p className="text-destructive text-sm">{form.formState.errors.person.message}</p>}
+                            </div>
+                            <div className="space-y-2">
+                                <Label htmlFor="amount">Amount ({currencySymbol})</Label>
+                                <Input id="amount" type="number" {...form.register("amount")} />
+                                {form.formState.errors.amount && <p className="text-destructive text-sm">{form.formState.errors.amount.message}</p>}
+                            </div>
+                            <div className="space-y-2">
+                                <Label htmlFor="purpose">Purpose</Label>
+                                <Input id="purpose" {...form.register("purpose")} />
+                                {form.formState.errors.purpose && <p className="text-destructive text-sm">{form.formState.errors.purpose.message}</p>}
+                            </div>
+                            <div className="space-y-2">
+                                <Label htmlFor="date">Date</Label>
+                                <Input id="date" type="date" {...form.register("date")} />
+                                {form.formState.errors.date && <p className="text-destructive text-sm">{form.formState.errors.date.message}</p>}
+                            </div>
+                            <DialogFooter>
+                                <DialogClose asChild><Button type="button" variant="secondary">Cancel</Button></DialogClose>
+                                <Button type="submit">Save Record</Button>
+                            </DialogFooter>
+                        </form>
+                    </DialogContent>
+                </Dialog>
+            </CardHeader>
+            <CardContent>
+                <Tabs defaultValue="lent">
+                    <TabsList className="grid w-full grid-cols-2">
+                        <TabsTrigger value="lent">Money I Lent</TabsTrigger>
+                        <TabsTrigger value="borrowed">Money I Borrowed</TabsTrigger>
+                    </TabsList>
+                    <TabsContent value="lent" className="mt-4">
+                        <RecordList records={lent} type="debit" currencySymbol={currencySymbol} onToggleStatus={handleToggleStatus} onDelete={handleDeleteRecord} />
+                    </TabsContent>
+                    <TabsContent value="borrowed" className="mt-4">
+                        <RecordList records={borrowed} type="credit" currencySymbol={currencySymbol} onToggleStatus={handleToggleStatus} onDelete={handleDeleteRecord} />
+                    </TabsContent>
+                </Tabs>
+            </CardContent>
+        </Card>
+    )
+}
+
+function RecordList({ records, type, currencySymbol, onToggleStatus, onDelete }: { records: CreditDebitRecord[], type: LendBorrowType, currencySymbol: string, onToggleStatus: (id: string, status: LendBorrowStatus) => void, onDelete: (id: string) => void }) {
+    if (records.length === 0) {
+        return <div className="text-center py-12"><p className="text-muted-foreground">No records here. Add one to get started!</p></div>
+    }
+
+    const cardColor = type === 'debit' ? "bg-primary/10 border-primary/20" : "bg-destructive/10 border-destructive/20";
+    const statusButtonColor = type === 'debit' ? "outline" : "destructive";
+
+    return (
+        <ScrollArea className="h-[400px]">
+            <ul className="space-y-3 pr-4">
+                <AnimatePresence>
+                    {records.map(record => (
+                        <motion.li
+                            key={record.id}
+                            layout
+                            initial={{ opacity: 0, y: 20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            exit={{ opacity: 0, x: -50, transition: { duration: 0.2 } }}
+                            className={`p-4 rounded-lg border ${cardColor} ${record.status === 'paid' ? 'opacity-50' : ''}`}
+                        >
+                            <div className="flex items-start justify-between">
+                                <div className="flex items-start gap-4">
+                                    <div className="flex flex-col items-center">
+                                       <Users size={24} />
+                                       <p className="font-bold text-lg">{record.person}</p>
+                                    </div>
+                                    <div>
+                                        <p className="font-semibold text-xl">{currencySymbol}{record.amount.toFixed(2)}</p>
+                                        <p className="text-sm text-muted-foreground">{record.purpose}</p>
+                                        <p className="text-xs text-muted-foreground mt-1">{format(new Date(record.date), 'MMM dd, yyyy')}</p>
+                                    </div>
+                                </div>
+                                <div className="flex flex-col items-end gap-2">
+                                     <div className="flex items-center gap-2">
+                                        <Button 
+                                          variant={record.status === 'pending' ? statusButtonColor : 'secondary'}
+                                          size="sm"
+                                          onClick={() => onToggleStatus(record.id, record.status)}
+                                        >
+                                            {record.status === 'pending' ? <XCircle size={16} className="mr-2" /> : <CheckCircle2 size={16} className="mr-2" />}
+                                            {record.status === 'pending' ? "Mark as Paid" : "Mark as Pending"}
+                                        </Button>
+                                        <AlertDialog>
+                                            <AlertDialogTrigger asChild>
+                                                <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-destructive size-8">
+                                                    <Trash2 size={16}/>
+                                                </Button>
+                                            </AlertDialogTrigger>
+                                            <AlertDialogContent>
+                                                <AlertDialogHeader>
+                                                    <AlertDialogTitle>Delete Record?</AlertDialogTitle>
+                                                    <AlertDialogDescription>Are you sure you want to delete this record? This cannot be undone.</AlertDialogDescription>
+                                                </AlertDialogHeader>
+                                                <AlertDialogFooter>
+                                                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                                    <AlertDialogAction onClick={() => onDelete(record.id)}>Delete</AlertDialogAction>
+                                                </AlertDialogFooter>
+                                            </AlertDialogContent>
+                                        </AlertDialog>
+                                    </div>
+                                    <span className={`text-xs font-bold px-2 py-1 rounded-full ${record.status === 'paid' ? 'bg-green-500 text-white' : 'bg-yellow-500 text-black'}`}>
+                                        {record.status.toUpperCase()}
+                                    </span>
+                               </div>
+                            </div>
+                        </motion.li>
+                    ))}
+                </AnimatePresence>
+            </ul>
+        </ScrollArea>
+    )
+}
+
 
 function AdvisorView({ currencySymbol }: { currencySymbol: string }) {
     const { state } = useStore();

@@ -11,7 +11,7 @@ export const CATEGORIES: { name: Category; emoji: string; }[] = [
 ];
 
 export const CURRENCIES: { name: string, code: Currency, symbol: string }[] = [
-  { name: 'Indian Rupee', code: 'INR', symbol: '₹' },
+  { name: 'Indian Rupee', code: 'INR', symbol: 'Rs.' },
   { name: 'US Dollar', code: 'USD', symbol: '$' },
   { name: 'Euro', code: 'EUR', symbol: '€' },
   { name: 'British Pound', code: 'GBP', symbol: '£' },
@@ -25,5 +25,5 @@ export const findCategoryEmoji = (categoryName: Category): string => {
 
 export const findCurrencySymbol = (currencyCode: Currency): string => {
   const currency = CURRENCIES.find(c => c.code === currencyCode);
-  return currency ? currency.symbol : '₹';
+  return currency ? currency.symbol : 'Rs.';
 };
