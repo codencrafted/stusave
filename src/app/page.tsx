@@ -326,33 +326,25 @@ export default function StuSaveApp() {
         
         <footer className="fixed bottom-0 left-0 right-0 z-50 border-t bg-background/95 backdrop-blur-sm">
             <TabsList className="grid h-auto w-full max-w-4xl grid-cols-5 mx-auto p-1 text-muted-foreground bg-transparent rounded-none">
-                <TabsTrigger value="dashboard" className="relative flex flex-col items-center justify-center gap-1 p-2 h-auto data-[state=active]:text-primary">
-                    <div className="relative z-10 flex flex-col items-center justify-center gap-1">
+                <TabsTrigger value="dashboard" className="flex flex-col items-center justify-center gap-1 p-2 h-auto data-[state=active]:text-primary">
+                    <motion.div
+                        animate={{ scale: activeTab === 'dashboard' ? 1.15 : 1, y: activeTab === 'dashboard' ? -5 : 0 }}
+                        transition={{ type: 'spring', stiffness: 300, damping: 15 }}
+                        className="flex flex-col items-center justify-center gap-1"
+                    >
                         <LayoutDashboard />
                         <span className="text-xs">Dashboard</span>
-                    </div>
-                    {activeTab === 'dashboard' && (
-                        <motion.div
-                            layoutId="active-nav-bubble"
-                            className="absolute z-0 inset-0 bg-primary/10"
-                            style={{ borderRadius: 'var(--radius)' }}
-                            transition={{ type: 'spring', bounce: 0.2, duration: 0.6 }}
-                        />
-                    )}
+                    </motion.div>
                 </TabsTrigger>
-                <TabsTrigger value="spendings" className="relative flex flex-col items-center justify-center gap-1 p-2 h-auto data-[state=active]:text-primary">
-                    <div className="relative z-10 flex flex-col items-center justify-center gap-1">
+                <TabsTrigger value="spendings" className="flex flex-col items-center justify-center gap-1 p-2 h-auto data-[state=active]:text-primary">
+                    <motion.div
+                        animate={{ scale: activeTab === 'spendings' ? 1.15 : 1, y: activeTab === 'spendings' ? -5 : 0 }}
+                        transition={{ type: 'spring', stiffness: 300, damping: 15 }}
+                        className="flex flex-col items-center justify-center gap-1"
+                    >
                         <Wallet />
                         <span className="text-xs">Spendings</span>
-                    </div>
-                    {activeTab === 'spendings' && (
-                        <motion.div
-                            layoutId="active-nav-bubble"
-                            className="absolute z-0 inset-0 bg-primary/10"
-                            style={{ borderRadius: 'var(--radius)' }}
-                            transition={{ type: 'spring', bounce: 0.2, duration: 0.6 }}
-                        />
-                    )}
+                    </motion.div>
                 </TabsTrigger>
 
                 <div className="flex items-center justify-center">
@@ -423,33 +415,25 @@ export default function StuSaveApp() {
                     </Dialog>
                 </div>
 
-                <TabsTrigger value="advisor" className="relative flex flex-col items-center justify-center gap-1 p-2 h-auto data-[state=active]:text-primary">
-                    <div className="relative z-10 flex flex-col items-center justify-center gap-1">
+                <TabsTrigger value="advisor" className="flex flex-col items-center justify-center gap-1 p-2 h-auto data-[state=active]:text-primary">
+                    <motion.div
+                        animate={{ scale: activeTab === 'advisor' ? 1.15 : 1, y: activeTab === 'advisor' ? -5 : 0 }}
+                        transition={{ type: 'spring', stiffness: 300, damping: 15 }}
+                        className="flex flex-col items-center justify-center gap-1"
+                    >
                         <Sparkles />
                         <span className="text-xs">AI Advisor</span>
-                    </div>
-                    {activeTab === 'advisor' && (
-                        <motion.div
-                            layoutId="active-nav-bubble"
-                            className="absolute z-0 inset-0 bg-primary/10"
-                            style={{ borderRadius: 'var(--radius)' }}
-                            transition={{ type: 'spring', bounce: 0.2, duration: 0.6 }}
-                        />
-                    )}
+                    </motion.div>
                 </TabsTrigger>
-                <TabsTrigger value="settings" className="relative flex flex-col items-center justify-center gap-1 p-2 h-auto data-[state=active]:text-primary">
-                    <div className="relative z-10 flex flex-col items-center justify-center gap-1">
+                <TabsTrigger value="settings" className="flex flex-col items-center justify-center gap-1 p-2 h-auto data-[state=active]:text-primary">
+                    <motion.div
+                        animate={{ scale: activeTab === 'settings' ? 1.15 : 1, y: activeTab === 'settings' ? -5 : 0 }}
+                        transition={{ type: 'spring', stiffness: 300, damping: 15 }}
+                        className="flex flex-col items-center justify-center gap-1"
+                    >
                         <Settings />
                         <span className="text-xs">Settings</span>
-                    </div>
-                    {activeTab === 'settings' && (
-                        <motion.div
-                            layoutId="active-nav-bubble"
-                            className="absolute z-0 inset-0 bg-primary/10"
-                            style={{ borderRadius: 'var(--radius)' }}
-                            transition={{ type: 'spring', bounce: 0.2, duration: 0.6 }}
-                        />
-                    )}
+                    </motion.div>
                 </TabsTrigger>
             </TabsList>
         </footer>
@@ -873,4 +857,5 @@ function AdvisorView({ currencySymbol }: { currencySymbol: string }) {
     
 
     
+
 
