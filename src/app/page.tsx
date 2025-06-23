@@ -152,11 +152,7 @@ export default function StuSaveApp() {
 
   return (
     <div className="min-h-screen bg-background text-foreground flex flex-col items-center p-4 font-body">
-      <main className="w-full max-w-4xl mx-auto">
-        <header className="flex flex-col items-center text-center mb-8">
-          <StuSaveLogo />
-        </header>
-
+      <main className="w-full max-w-4xl mx-auto pt-8">
         <Tabs defaultValue="dashboard" className="w-full">
           <TabsList className="grid w-full grid-cols-3 sm:grid-cols-6 h-auto sm:h-12">
             <TabsTrigger value="dashboard" className="flex flex-col sm:flex-row gap-2 py-2"><LayoutDashboard />Dashboard</TabsTrigger>
