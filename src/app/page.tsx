@@ -6,7 +6,7 @@ import { useStore } from '@/hooks/use-store';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { ArrowLeftRight, LayoutDashboard, PlusCircle, Settings, Sparkles, Target, Trash2, HandCoins, Users, CheckCircle2, XCircle, Bell, Lightbulb } from 'lucide-react';
+import { ArrowLeftRight, LayoutDashboard, PlusCircle, Settings, Sparkles, Target, Trash2, HandCoins, Users, CheckCircle2, XCircle, Bell, Lightbulb, ArrowUpRight, ArrowDownLeft } from 'lucide-react';
 import { format, startOfWeek, startOfMonth, isWithinInterval } from 'date-fns';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -624,9 +624,14 @@ function LendBorrowView({ currencySymbol }: { currencySymbol: string }) {
                     <DialogTrigger asChild>
                         <Button><PlusCircle className="mr-2"/> Add Record</Button>
                     </DialogTrigger>
-                    <DialogContent>
-                        <DialogHeader><DialogTitle>Add a New Lend/Borrow Record</DialogTitle></DialogHeader>
-                        <form onSubmit={form.handleSubmit(handleAddRecord)} className="space-y-4">
+                    <DialogContent className="sm:max-w-md">
+                        <DialogHeader>
+                            <DialogTitle>Add Lend/Borrow Record</DialogTitle>
+                            <DialogDescription>
+                                Track money you've lent to or borrowed from others.
+                            </DialogDescription>
+                        </DialogHeader>
+                        <form onSubmit={form.handleSubmit(handleAddRecord)} className="space-y-4 pt-2">
                             <Controller
                                 control={form.control}
                                 name="type"
@@ -634,14 +639,18 @@ function LendBorrowView({ currencySymbol }: { currencySymbol: string }) {
                                     <RadioGroup onValueChange={field.onChange} defaultValue={field.value} className="grid grid-cols-2 gap-4">
                                         <div>
                                             <RadioGroupItem value="debit" id="debit" className="peer sr-only" />
-                                            <Label htmlFor="debit" className="flex flex-col items-center justify-between rounded-md border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary">
-                                                I Lent Money
+                                            <Label htmlFor="debit" className="flex flex-col items-center justify-center gap-2 rounded-md border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary cursor-pointer">
+                                                <ArrowUpRight className="h-6 w-6 text-primary" />
+                                                <span className="font-semibold">I Lent</span>
+                                                <span className="text-xs text-muted-foreground text-center">Money I gave away</span>
                                             </Label>
                                         </div>
                                         <div>
                                             <RadioGroupItem value="credit" id="credit" className="peer sr-only" />
-                                            <Label htmlFor="credit" className="flex flex-col items-center justify-between rounded-md border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-destructive [&:has([data-state=checked])]:border-destructive">
-                                                I Borrowed Money
+                                            <Label htmlFor="credit" className="flex flex-col items-center justify-center gap-2 rounded-md border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-destructive [&:has([data-state=checked])]:border-destructive cursor-pointer">
+                                                <ArrowDownLeft className="h-6 w-6 text-destructive" />
+                                                <span className="font-semibold">I Borrowed</span>
+                                                <span className="text-xs text-muted-foreground text-center">Money I received</span>
                                             </Label>
                                         </div>
                                     </RadioGroup>
@@ -649,26 +658,28 @@ function LendBorrowView({ currencySymbol }: { currencySymbol: string }) {
                             />
                             <div className="space-y-2">
                                 <Label htmlFor="person">Person's Name</Label>
-                                <Input id="person" {...form.register("person")} />
+                                <Input id="person" placeholder="e.g. Jane Doe" {...form.register("person")} />
                                 {form.formState.errors.person && <p className="text-destructive text-sm">{form.formState.errors.person.message}</p>}
                             </div>
-                            <div className="space-y-2">
-                                <Label htmlFor="amount">Amount ({currencySymbol})</Label>
-                                <Input id="amount" type="number" {...form.register("amount")} />
-                                {form.formState.errors.amount && <p className="text-destructive text-sm">{form.formState.errors.amount.message}</p>}
-                            </div>
-                            <div className="space-y-2">
+                             <div className="space-y-2">
                                 <Label htmlFor="purpose">Purpose</Label>
-                                <Input id="purpose" {...form.register("purpose")} />
+                                <Input id="purpose" placeholder="e.g. Coffee" {...form.register("purpose")} />
                                 {form.formState.errors.purpose && <p className="text-destructive text-sm">{form.formState.errors.purpose.message}</p>}
                             </div>
-                            <div className="space-y-2">
-                                <Label htmlFor="date">Date</Label>
-                                <Input id="date" type="date" {...form.register("date")} />
-                                {form.formState.errors.date && <p className="text-destructive text-sm">{form.formState.errors.date.message}</p>}
+                            <div className="grid grid-cols-2 gap-4">
+                                <div className="space-y-2">
+                                    <Label htmlFor="amount">Amount ({currencySymbol})</Label>
+                                    <Input id="amount" type="number" placeholder="0.00" {...form.register("amount")} />
+                                    {form.formState.errors.amount && <p className="text-destructive text-sm">{form.formState.errors.amount.message}</p>}
+                                </div>
+                                <div className="space-y-2">
+                                    <Label htmlFor="date">Date</Label>
+                                    <Input id="date" type="date" {...form.register("date")} />
+                                    {form.formState.errors.date && <p className="text-destructive text-sm">{form.formState.errors.date.message}</p>}
+                                </div>
                             </div>
-                            <DialogFooter>
-                                <DialogClose asChild><Button type="button" variant="secondary">Cancel</Button></DialogClose>
+                            <DialogFooter className="pt-4">
+                                <DialogClose asChild><Button type="button" variant="outline">Cancel</Button></DialogClose>
                                 <Button type="submit">Save Record</Button>
                             </DialogFooter>
                         </form>
@@ -860,3 +871,5 @@ function AdvisorView({ currencySymbol }: { currencySymbol: string }) {
         </Card>
     );
 }
+
+    
