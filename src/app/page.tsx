@@ -25,7 +25,7 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { useToast } from '@/hooks/use-toast';
 import { CategoryPieChart } from '@/components/category-pie-chart';
 import { ThemeToggle } from '@/components/theme-toggle';
-import { CATEGORIES, findCategoryEmoji, CURRENCIES, findCurrencySymbol } from '@/lib/constants';
+import { CATEGORIES, findCategoryEmoji, CURRENCIES, findCurrencySymbol, findCategoryIcon } from '@/lib/constants';
 import type { Category, Transaction, Currency, CreditDebitRecord, LendBorrowStatus, LendBorrowType } from '@/lib/types';
 import { Skeleton } from '@/components/ui/skeleton';
 import { StuSaveLogo } from '@/components/logo';
@@ -471,37 +471,42 @@ function TransactionList({ transactions, onDelete, currencySymbol }: { transacti
             </div>
             <ScrollArea className="h-[400px]">
                 <ul className="space-y-3 pr-4">
-                    {filteredTransactions.map(t => (
-                        <li key={t.id} className="flex items-center justify-between p-3 rounded-lg border bg-card hover:bg-muted/50 transition-colors animate-in fade-in-0 slide-in-from-top-2 duration-300">
-                           <div className="flex items-center gap-4">
-                               <span className="text-2xl">{findCategoryEmoji(t.category)}</span>
-                               <div>
-                                   <p className="font-semibold">{t.description}</p>
-                                   <p className="text-sm text-muted-foreground">{format(new Date(t.date), 'MMM dd, yyyy')}</p>
+                    {filteredTransactions.map(t => {
+                        const Icon = findCategoryIcon(t.category);
+                        return (
+                            <li key={t.id} className="flex items-center justify-between p-3 rounded-lg border bg-card hover:bg-muted/50 transition-colors animate-in fade-in-0 slide-in-from-top-2 duration-300">
+                               <div className="flex items-center gap-4">
+                                   <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
+                                       <Icon className="h-5 w-5 text-primary" />
+                                   </div>
+                                   <div>
+                                       <p className="font-semibold">{t.description}</p>
+                                       <p className="text-sm text-muted-foreground">{format(new Date(t.date), 'MMM dd, yyyy')}</p>
+                                   </div>
                                </div>
-                           </div>
-                           <div className="flex items-center gap-3">
-                                <p className="font-semibold text-lg">{currencySymbol}{t.amount.toFixed(2)}</p>
-                                <AlertDialog>
-                                    <AlertDialogTrigger asChild>
-                                        <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-destructive size-8">
-                                            <Trash2 size={16}/>
-                                        </Button>
-                                    </AlertDialogTrigger>
-                                    <AlertDialogContent>
-                                        <AlertDialogHeader>
-                                            <AlertDialogTitle>Delete Transaction?</AlertDialogTitle>
-                                            <AlertDialogDescription>Are you sure you want to delete this transaction? This cannot be undone.</AlertDialogDescription>
-                                        </AlertDialogHeader>
-                                        <AlertDialogFooter>
-                                            <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                            <AlertDialogAction onClick={() => onDelete(t.id)}>Delete</AlertDialogAction>
-                                        </AlertDialogFooter>
-                                    </AlertDialogContent>
-                                </AlertDialog>
-                           </div>
-                        </li>
-                    ))}
+                               <div className="flex items-center gap-3">
+                                    <p className="font-semibold text-lg">{currencySymbol}{t.amount.toFixed(2)}</p>
+                                    <AlertDialog>
+                                        <AlertDialogTrigger asChild>
+                                            <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-destructive size-8">
+                                                <Trash2 size={16}/>
+                                            </Button>
+                                        </AlertDialogTrigger>
+                                        <AlertDialogContent>
+                                            <AlertDialogHeader>
+                                                <AlertDialogTitle>Delete Transaction?</AlertDialogTitle>
+                                                <AlertDialogDescription>Are you sure you want to delete this transaction? This cannot be undone.</AlertDialogDescription>
+                                            </AlertDialogHeader>
+                                            <AlertDialogFooter>
+                                                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                                <AlertDialogAction onClick={() => onDelete(t.id)}>Delete</AlertDialogAction>
+                                            </AlertDialogFooter>
+                                        </AlertDialogContent>
+                                    </AlertDialog>
+                               </div>
+                            </li>
+                        );
+                    })}
                 </ul>
                 {filteredTransactions.length === 0 && <div className="text-center py-12"><p className="text-muted-foreground">No transactions for this period.</p></div>}
             </ScrollArea>
