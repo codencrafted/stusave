@@ -17,7 +17,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Progress } from '@/components/ui/progress';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter, DialogClose } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter, DialogClose, DialogDescription } from '@/components/ui/dialog';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { ScrollArea } from '@/components/ui/scroll-area';
@@ -28,7 +28,6 @@ import { ThemeToggle } from '@/components/theme-toggle';
 import { CATEGORIES, findCategoryEmoji, CURRENCIES, findCurrencySymbol, findCategoryIcon } from '@/lib/constants';
 import type { Category, Transaction, Currency, CreditDebitRecord, LendBorrowStatus, LendBorrowType } from '@/lib/types';
 import { Skeleton } from '@/components/ui/skeleton';
-import { StuSaveLogo } from '@/components/logo';
 
 const transactionSchema = z.object({
   amount: z.coerce.number().positive("Amount must be positive"),
@@ -160,42 +159,42 @@ export default function StuSaveApp() {
               <LayoutDashboard className="z-10" />
               <span className="z-10">Dashboard</span>
               {activeTab === 'dashboard' && (
-                  <motion.div layoutId="active-tab-indicator" className="absolute inset-0 rounded-md bg-background shadow-sm" transition={{ type: "spring", stiffness: 350, damping: 30 }}/>
+                  <motion.div layoutId="active-tab-indicator" className="absolute inset-0 rounded-md bg-card shadow-sm" transition={{ type: "spring", stiffness: 350, damping: 30 }}/>
               )}
             </TabsTrigger>
             <TabsTrigger value="transactions" className="relative flex flex-col sm:flex-row gap-2 py-2">
               <ArrowLeftRight className="z-10" />
               <span className="z-10">Transactions</span>
                {activeTab === 'transactions' && (
-                  <motion.div layoutId="active-tab-indicator" className="absolute inset-0 rounded-md bg-background shadow-sm" transition={{ type: "spring", stiffness: 350, damping: 30 }}/>
+                  <motion.div layoutId="active-tab-indicator" className="absolute inset-0 rounded-md bg-card shadow-sm" transition={{ type: "spring", stiffness: 350, damping: 30 }}/>
               )}
             </TabsTrigger>
             <TabsTrigger value="lendborrow" className="relative flex flex-col sm:flex-row gap-2 py-2">
               <HandCoins className="z-10" />
               <span className="z-10">Lend/Borrow</span>
                {activeTab === 'lendborrow' && (
-                  <motion.div layoutId="active-tab-indicator" className="absolute inset-0 rounded-md bg-background shadow-sm" transition={{ type: "spring", stiffness: 350, damping: 30 }}/>
+                  <motion.div layoutId="active-tab-indicator" className="absolute inset-0 rounded-md bg-card shadow-sm" transition={{ type: "spring", stiffness: 350, damping: 30 }}/>
               )}
             </TabsTrigger>
             <TabsTrigger value="goals" className="relative flex flex-col sm:flex-row gap-2 py-2">
               <Target className="z-10" />
               <span className="z-10">Goals & Budget</span>
                {activeTab === 'goals' && (
-                  <motion.div layoutId="active-tab-indicator" className="absolute inset-0 rounded-md bg-background shadow-sm" transition={{ type: "spring", stiffness: 350, damping: 30 }}/>
+                  <motion.div layoutId="active-tab-indicator" className="absolute inset-0 rounded-md bg-card shadow-sm" transition={{ type: "spring", stiffness: 350, damping: 30 }}/>
               )}
             </TabsTrigger>
             <TabsTrigger value="advisor" className="relative flex flex-col sm:flex-row gap-2 py-2">
               <Sparkles className="z-10" />
               <span className="z-10">AI Advisor</span>
                {activeTab === 'advisor' && (
-                  <motion.div layoutId="active-tab-indicator" className="absolute inset-0 rounded-md bg-background shadow-sm" transition={{ type: "spring", stiffness: 350, damping: 30 }}/>
+                  <motion.div layoutId="active-tab-indicator" className="absolute inset-0 rounded-md bg-card shadow-sm" transition={{ type: "spring", stiffness: 350, damping: 30 }}/>
               )}
             </TabsTrigger>
             <TabsTrigger value="settings" className="relative flex flex-col sm:flex-row gap-2 py-2">
               <Settings className="z-10" />
               <span className="z-10">Settings</span>
                {activeTab === 'settings' && (
-                  <motion.div layoutId="active-tab-indicator" className="absolute inset-0 rounded-md bg-background shadow-sm" transition={{ type: "spring", stiffness: 350, damping: 30 }}/>
+                  <motion.div layoutId="active-tab-indicator" className="absolute inset-0 rounded-md bg-card shadow-sm" transition={{ type: "spring", stiffness: 350, damping: 30 }}/>
               )}
             </TabsTrigger>
           </TabsList>
@@ -293,19 +292,29 @@ export default function StuSaveApp() {
                       <DialogTrigger asChild>
                         <Button><PlusCircle className="mr-2"/> Add Transaction</Button>
                       </DialogTrigger>
-                      <DialogContent>
+                      <DialogContent className="sm:max-w-md">
                         <DialogHeader>
                           <DialogTitle>Add a New Transaction</DialogTitle>
+                           <DialogDescription>
+                            Enter the details for your new expense record.
+                          </DialogDescription>
                         </DialogHeader>
-                        <form onSubmit={transactionForm.handleSubmit(handleAddTransaction)} className="space-y-4">
+                        <form onSubmit={transactionForm.handleSubmit(handleAddTransaction)} className="space-y-4 pt-2">
+                           <div className="grid grid-cols-2 gap-4">
+                             <div className="space-y-2">
+                              <Label htmlFor="amount">Amount ({currencySymbol})</Label>
+                              <Input id="amount" type="number" placeholder="0.00" {...transactionForm.register("amount")} />
+                              {transactionForm.formState.errors.amount && <p className="text-destructive text-sm">{transactionForm.formState.errors.amount.message}</p>}
+                            </div>
+                            <div className="space-y-2">
+                               <Label htmlFor="date">Date</Label>
+                               <Input id="date" type="date" {...transactionForm.register("date")} />
+                               {transactionForm.formState.errors.date && <p className="text-destructive text-sm">{transactionForm.formState.errors.date.message}</p>}
+                             </div>
+                           </div>
                            <div className="space-y-2">
-                            <Label htmlFor="amount">Amount ({currencySymbol})</Label>
-                            <Input id="amount" type="number" {...transactionForm.register("amount")} />
-                            {transactionForm.formState.errors.amount && <p className="text-destructive text-sm">{transactionForm.formState.errors.amount.message}</p>}
-                          </div>
-                          <div className="space-y-2">
                             <Label htmlFor="description">Description</Label>
-                            <Input id="description" {...transactionForm.register("description")} />
+                            <Input id="description" placeholder="e.g. Lunch with colleagues" {...transactionForm.register("description")} />
                             {transactionForm.formState.errors.description && <p className="text-destructive text-sm">{transactionForm.formState.errors.description.message}</p>}
                           </div>
                            <div className="space-y-2">
@@ -317,20 +326,25 @@ export default function StuSaveApp() {
                                     <Select onValueChange={field.onChange} defaultValue={field.value}>
                                         <SelectTrigger><SelectValue placeholder="Select a category" /></SelectTrigger>
                                         <SelectContent>
-                                            {CATEGORIES.map(c => <SelectItem key={c.name} value={c.name}>{c.emoji} {c.name}</SelectItem>)}
+                                            {CATEGORIES.map(c => {
+                                              const Icon = c.icon;
+                                              return (
+                                                <SelectItem key={c.name} value={c.name}>
+                                                  <div className="flex items-center gap-3">
+                                                    <Icon className="h-4 w-4 text-muted-foreground" />
+                                                    <span>{c.name}</span>
+                                                  </div>
+                                                </SelectItem>
+                                              )
+                                            })}
                                         </SelectContent>
                                     </Select>
                                 )} />
                             {transactionForm.formState.errors.category && <p className="text-destructive text-sm">{transactionForm.formState.errors.category.message}</p>}
                            </div>
-                           <div className="space-y-2">
-                             <Label htmlFor="date">Date</Label>
-                             <Input id="date" type="date" {...transactionForm.register("date")} />
-                             {transactionForm.formState.errors.date && <p className="text-destructive text-sm">{transactionForm.formState.errors.date.message}</p>}
-                           </div>
-                           <DialogFooter>
+                           <DialogFooter className="pt-4">
                              <DialogClose asChild>
-                               <Button type="button" variant="secondary">Cancel</Button>
+                               <Button type="button" variant="outline">Cancel</Button>
                              </DialogClose>
                              <Button type="submit">Save Transaction</Button>
                            </DialogFooter>
