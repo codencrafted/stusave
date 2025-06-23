@@ -7,7 +7,7 @@ import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { LayoutDashboard, PlusCircle, Settings, Sparkles, PiggyBank, Trash2, HandCoins, Users, CheckCircle2, XCircle, Bell, Lightbulb, ArrowUpRight, ArrowDownLeft, Wallet } from 'lucide-react';
-import { format, startOfMonth, isWithinInterval } from 'date-fns';
+import { format, startOfMonth, isWithinInterval, startOfWeek } from 'date-fns';
 import { motion, AnimatePresence } from 'framer-motion';
 
 import { getSmartAdvice } from '@/ai/flows/get-smart-advice';
@@ -324,7 +324,7 @@ export default function StuSaveApp() {
         </main>
         
         <footer className="fixed bottom-0 left-0 right-0 z-50 border-t bg-background/95 backdrop-blur-sm">
-            <div className="grid h-auto w-full max-w-4xl grid-cols-5 mx-auto p-1 text-muted-foreground">
+            <TabsList className="grid h-auto w-full max-w-4xl grid-cols-5 mx-auto p-1 text-muted-foreground bg-transparent rounded-none">
                 <TabsTrigger value="dashboard" className="relative flex flex-col items-center justify-center gap-1 p-2 h-auto data-[state=active]:text-primary">
                     <motion.div 
                         className="flex flex-col items-center justify-center gap-1 z-10"
@@ -434,7 +434,7 @@ export default function StuSaveApp() {
                         <span className="text-xs">Settings</span>
                     </motion.div>
                 </TabsTrigger>
-            </div>
+            </TabsList>
         </footer>
       </Tabs>
     </div>
