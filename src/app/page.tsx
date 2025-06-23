@@ -5,7 +5,7 @@ import { useStore } from '@/hooks/use-store';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { ArrowLeftRight, LayoutDashboard, PlusCircle, Settings, Sparkles, Target, Trash2, HandCoins, Users, CheckCircle2, XCircle, Bell } from 'lucide-react';
+import { ArrowLeftRight, LayoutDashboard, PlusCircle, Settings, Sparkles, Target, Trash2, HandCoins, Users, CheckCircle2, XCircle, Bell, Lightbulb } from 'lucide-react';
 import { format, startOfWeek, startOfMonth, isWithinInterval } from 'date-fns';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -798,36 +798,61 @@ function AdvisorView({ currencySymbol }: { currencySymbol: string }) {
     };
 
     return (
-        <Card>
-            <CardHeader>
-                <CardTitle>AI Money Advisor</CardTitle>
-                <CardDescription>Get personalized, smart money-saving tips based on your spending habits.</CardDescription>
-            </CardHeader>
-            <CardContent className="text-center">
-                <Button onClick={handleGetAdvice} disabled={loading} size="lg">
-                    {loading ? "Thinking..." : <>💡 Get Smart Tip</>}
-                </Button>
-
-                {loading && (
-                    <div className="mt-6 space-y-4">
-                       <Skeleton className="h-8 w-3/4 mx-auto" />
-                       <Skeleton className="h-8 w-1/2 mx-auto" />
+        <Card className="overflow-hidden">
+            <CardHeader className="bg-muted/30">
+                <div className="flex items-center gap-4">
+                    <div className="bg-primary/10 text-primary p-3 rounded-full">
+                       <Sparkles size={24} />
                     </div>
-                )}
+                    <div>
+                        <CardTitle className="font-headline">AI Money Advisor</CardTitle>
+                        <CardDescription>Get smart money-saving tips based on your spending.</CardDescription>
+                    </div>
+                </div>
+            </CardHeader>
+            <CardContent className="p-6 text-center">
+                 <div className="flex flex-col items-center justify-center min-h-[250px]">
+                    {loading && (
+                        <div className="space-y-4 animate-in fade-in-0">
+                           <p className="text-muted-foreground">Generating your smart tip...</p>
+                           <Skeleton className="h-8 w-64 mx-auto" />
+                           <Skeleton className="h-8 w-48 mx-auto" />
+                        </div>
+                    )}
 
-                {advice && !loading && (
-                     <Card className="mt-6 bg-primary/10 border-primary/20 text-center animate-in fade-in-0 zoom-in-95 duration-500">
-                        <CardContent className="pt-6">
-                            <p className="text-lg font-medium font-headline text-primary dark:text-primary-foreground">
+                    {!loading && advice && (
+                        <motion.div 
+                            initial={{ opacity: 0, scale: 0.95 }}
+                            animate={{ opacity: 1, scale: 1 }}
+                            transition={{ duration: 0.5 }}
+                            className="bg-primary/10 border-l-4 border-primary p-6 rounded-lg text-left w-full"
+                        >
+                            <p className="text-xl font-medium font-headline text-primary-foreground/90">
                                 {advice}
                             </p>
-                        </CardContent>
-                    </Card>
-                )}
+                        </motion.div>
+                    )}
+
+                    {!loading && !advice && (
+                        <div className="text-center space-y-3 animate-in fade-in-0">
+                            <Lightbulb className="mx-auto h-12 w-12 text-muted-foreground" />
+                            <h3 className="text-lg font-semibold">Ready for some advice?</h3>
+                            <p className="text-muted-foreground max-w-sm mx-auto">
+                                Click the button below to let our AI analyze your spending and give you a personalized money-saving tip.
+                            </p>
+                        </div>
+                    )}
+                </div>
+
             </CardContent>
-             <CardFooter className="flex-col items-center justify-center text-xs text-muted-foreground pt-4">
-                <p>Powered by Gemini AI</p>
-                <p>Advice is generated and may not always be accurate.</p>
+            <CardFooter className="flex-col items-center justify-center border-t pt-6">
+                <Button onClick={handleGetAdvice} disabled={loading} size="lg">
+                    {loading ? "Thinking..." : "💡 Get Smart Tip"}
+                </Button>
+                <div className="text-xs text-muted-foreground mt-4 text-center">
+                    <p>Powered by Gemini AI.</p>
+                    <p>Advice is generated and may not always be accurate.</p>
+                </div>
             </CardFooter>
         </Card>
     );
