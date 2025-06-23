@@ -480,42 +480,51 @@ function SpendingList({ spendings, onDelete, currencySymbol }: { spendings: Spen
             </div>
             <ScrollArea className="h-[400px]">
                 <ul className="space-y-3 pr-4">
-                    {filteredSpendings.map(t => {
-                        const Icon = findCategoryIcon(t.category);
-                        return (
-                            <li key={t.id} className="flex items-center justify-between p-3 rounded-lg border bg-card hover:bg-muted/50 transition-colors animate-in fade-in-0 slide-in-from-top-2 duration-300">
-                               <div className="flex items-center gap-4">
-                                   <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
-                                       <Icon className="h-5 w-5 text-primary" />
+                    <AnimatePresence>
+                        {filteredSpendings.map(t => {
+                            const Icon = findCategoryIcon(t.category);
+                            return (
+                                <motion.li 
+                                    key={t.id} 
+                                    layout
+                                    initial={{ opacity: 0, y: 20, scale: 0.95 }}
+                                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                                    exit={{ opacity: 0, x: -50, transition: { duration: 0.2 } }}
+                                    className="flex items-center justify-between p-3 rounded-lg border bg-card hover:bg-muted/50 transition-colors"
+                                >
+                                   <div className="flex items-center gap-4">
+                                       <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
+                                           <Icon className="h-5 w-5 text-primary" />
+                                       </div>
+                                       <div>
+                                           <p className="font-semibold">{t.description}</p>
+                                           <p className="text-sm text-muted-foreground">{format(new Date(t.date), 'MMM dd, yyyy')}</p>
+                                       </div>
                                    </div>
-                                   <div>
-                                       <p className="font-semibold">{t.description}</p>
-                                       <p className="text-sm text-muted-foreground">{format(new Date(t.date), 'MMM dd, yyyy')}</p>
+                                   <div className="flex items-center gap-3">
+                                        <p className="font-semibold text-lg">{currencySymbol}{t.amount.toFixed(2)}</p>
+                                        <AlertDialog>
+                                            <AlertDialogTrigger asChild>
+                                                <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-destructive size-8">
+                                                    <Trash2 size={16}/>
+                                                </Button>
+                                            </AlertDialogTrigger>
+                                            <AlertDialogContent>
+                                                <AlertDialogHeader>
+                                                    <AlertDialogTitle>Delete Spending?</AlertDialogTitle>
+                                                    <AlertDialogDescription>Are you sure you want to delete this spending? This cannot be undone.</AlertDialogDescription>
+                                                </AlertDialogHeader>
+                                                <AlertDialogFooter>
+                                                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                                    <AlertDialogAction onClick={() => onDelete(t.id)}>Delete</AlertDialogAction>
+                                                </AlertDialogFooter>
+                                            </AlertDialogContent>
+                                        </AlertDialog>
                                    </div>
-                               </div>
-                               <div className="flex items-center gap-3">
-                                    <p className="font-semibold text-lg">{currencySymbol}{t.amount.toFixed(2)}</p>
-                                    <AlertDialog>
-                                        <AlertDialogTrigger asChild>
-                                            <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-destructive size-8">
-                                                <Trash2 size={16}/>
-                                            </Button>
-                                        </AlertDialogTrigger>
-                                        <AlertDialogContent>
-                                            <AlertDialogHeader>
-                                                <AlertDialogTitle>Delete Spending?</AlertDialogTitle>
-                                                <AlertDialogDescription>Are you sure you want to delete this spending? This cannot be undone.</AlertDialogDescription>
-                                            </AlertDialogHeader>
-                                            <AlertDialogFooter>
-                                                <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                                <AlertDialogAction onClick={() => onDelete(t.id)}>Delete</AlertDialogAction>
-                                            </AlertDialogFooter>
-                                        </AlertDialogContent>
-                                    </AlertDialog>
-                               </div>
-                            </li>
-                        );
-                    })}
+                                </motion.li>
+                            );
+                        })}
+                    </AnimatePresence>
                 </ul>
                 {filteredSpendings.length === 0 && <div className="text-center py-12"><p className="text-muted-foreground">No spendings for this period.</p></div>}
             </ScrollArea>
