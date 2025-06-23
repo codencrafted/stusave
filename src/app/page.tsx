@@ -382,39 +382,69 @@ export default function StuSaveApp() {
         <footer className="fixed bottom-0 left-0 right-0 z-50 border-t bg-background/95 backdrop-blur-sm">
             <TabsList className="grid h-auto w-full max-w-4xl grid-cols-5 mx-auto bg-transparent p-1 text-muted-foreground">
                 <TabsTrigger value="dashboard" className="relative flex flex-col items-center justify-center gap-1 p-2 h-auto">
-                <LayoutDashboard className="z-10" />
-                <span className="z-10 text-xs">Dashboard</span>
-                {activeTab === 'dashboard' && (
-                    <motion.div layoutId="active-tab-indicator" className="absolute inset-0 rounded-md bg-card shadow-sm" transition={{ type: "spring", stiffness: 350, damping: 30 }}/>
-                )}
+                    <motion.div 
+                        className="flex flex-col items-center justify-center gap-1 z-10"
+                        animate={{ y: activeTab === 'dashboard' ? -6 : 0 }}
+                        transition={{ type: "spring", stiffness: 400, damping: 25 }}
+                    >
+                        <LayoutDashboard />
+                        <span className="text-xs">Dashboard</span>
+                    </motion.div>
+                    {activeTab === 'dashboard' && (
+                        <motion.div layoutId="active-tab-indicator" className="absolute inset-0 rounded-md bg-card shadow-sm" transition={{ type: "spring", stiffness: 350, damping: 30 }}/>
+                    )}
                 </TabsTrigger>
                 <TabsTrigger value="budget" className="relative flex flex-col items-center justify-center gap-1 p-2 h-auto">
-                <PiggyBank className="z-10" />
-                <span className="z-10 text-xs">Budget</span>
-                {activeTab === 'budget' && (
-                    <motion.div layoutId="active-tab-indicator" className="absolute inset-0 rounded-md bg-card shadow-sm" transition={{ type: "spring", stiffness: 350, damping: 30 }}/>
-                )}
+                    <motion.div 
+                        className="flex flex-col items-center justify-center gap-1 z-10"
+                        animate={{ y: activeTab === 'budget' ? -6 : 0 }}
+                        transition={{ type: "spring", stiffness: 400, damping: 25 }}
+                    >
+                        <PiggyBank />
+                        <span className="text-xs">Budget</span>
+                    </motion.div>
+                    {activeTab === 'budget' && (
+                        <motion.div layoutId="active-tab-indicator" className="absolute inset-0 rounded-md bg-card shadow-sm" transition={{ type: "spring", stiffness: 350, damping: 30 }}/>
+                    )}
                 </TabsTrigger>
                 <TabsTrigger value="spendings" className="relative flex flex-col items-center justify-center gap-1 p-2 h-auto">
-                <PlusCircle className="z-10 h-7 w-7 text-primary" />
-                <span className="z-10 text-xs">Spendings</span>
-                {activeTab === 'spendings' && (
-                    <motion.div layoutId="active-tab-indicator" className="absolute inset-0 rounded-md bg-card shadow-sm" transition={{ type: "spring", stiffness: 350, damping: 30 }}/>
-                )}
+                    <motion.div 
+                        className="flex flex-col items-center justify-center gap-1 z-10"
+                        animate={{ y: activeTab === 'spendings' ? -6 : 0 }}
+                        transition={{ type: "spring", stiffness: 400, damping: 25 }}
+                    >
+                        <PlusCircle className="h-7 w-7 text-primary" />
+                        <span className="text-xs">Spendings</span>
+                    </motion.div>
+                    {activeTab === 'spendings' && (
+                        <motion.div layoutId="active-tab-indicator" className="absolute inset-0 rounded-md bg-card shadow-sm" transition={{ type: "spring", stiffness: 350, damping: 30 }}/>
+                    )}
                 </TabsTrigger>
                 <TabsTrigger value="lendborrow" className="relative flex flex-col items-center justify-center gap-1 p-2 h-auto">
-                <HandCoins className="z-10" />
-                <span className="z-10 text-xs">Lend/Borrow</span>
-                {activeTab === 'lendborrow' && (
-                    <motion.div layoutId="active-tab-indicator" className="absolute inset-0 rounded-md bg-card shadow-sm" transition={{ type: "spring", stiffness: 350, damping: 30 }}/>
-                )}
+                    <motion.div 
+                        className="flex flex-col items-center justify-center gap-1 z-10"
+                        animate={{ y: activeTab === 'lendborrow' ? -6 : 0 }}
+                        transition={{ type: "spring", stiffness: 400, damping: 25 }}
+                    >
+                        <HandCoins />
+                        <span className="text-xs">Lend/Borrow</span>
+                    </motion.div>
+                    {activeTab === 'lendborrow' && (
+                        <motion.div layoutId="active-tab-indicator" className="absolute inset-0 rounded-md bg-card shadow-sm" transition={{ type: "spring", stiffness: 350, damping: 30 }}/>
+                    )}
                 </TabsTrigger>
                 <TabsTrigger value="advisor" className="relative flex flex-col items-center justify-center gap-1 p-2 h-auto">
-                <Sparkles className="z-10" />
-                <span className="z-10 text-xs">AI Advisor</span>
-                {activeTab === 'advisor' && (
-                    <motion.div layoutId="active-tab-indicator" className="absolute inset-0 rounded-md bg-card shadow-sm" transition={{ type: "spring", stiffness: 350, damping: 30 }}/>
-                )}
+                    <motion.div 
+                        className="flex flex-col items-center justify-center gap-1 z-10"
+                        animate={{ y: activeTab === 'advisor' ? -6 : 0 }}
+                        transition={{ type: "spring", stiffness: 400, damping: 25 }}
+                    >
+                        <Sparkles />
+                        <span className="text-xs">AI Advisor</span>
+                    </motion.div>
+                    {activeTab === 'advisor' && (
+                        <motion.div layoutId="active-tab-indicator" className="absolute inset-0 rounded-md bg-card shadow-sm" transition={{ type: "spring", stiffness: 350, damping: 30 }}/>
+                    )}
                 </TabsTrigger>
             </TabsList>
         </footer>
