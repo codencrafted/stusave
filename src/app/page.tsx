@@ -27,10 +27,10 @@ import { useToast } from '@/hooks/use-toast';
 import { CategoryPieChart } from '@/components/category-pie-chart';
 import { ThemeToggle } from '@/components/theme-toggle';
 import { CATEGORIES, findCategoryEmoji, CURRENCIES, findCurrencySymbol, findCategoryIcon } from '@/lib/constants';
-import type { Category, Transaction, Currency, CreditDebitRecord, LendBorrowStatus, LendBorrowType } from '@/lib/types';
+import type { Category, Spending, Currency, CreditDebitRecord, LendBorrowStatus, LendBorrowType } from '@/lib/types';
 import { Skeleton } from '@/components/ui/skeleton';
 
-const transactionSchema = z.object({
+const spendingSchema = z.object({
   amount: z.coerce.number().positive("Amount must be positive"),
   category: z.enum(CATEGORIES.map(c => c.name) as [Category, ...Category[]]),
   description: z.string().min(1, "Description is required"),
@@ -59,14 +59,14 @@ const lendBorrowSchema = z.object({
 export default function StuSaveApp() {
   const { state, dispatch } = useStore();
   const { toast } = useToast();
-  const [isAddTransactionOpen, setAddTransactionOpen] = useState(false);
+  const [isAddSpendingOpen, setAddSpendingOpen] = useState(false);
   const [activeTab, setActiveTab] = useState('dashboard');
 
   const currencySymbol = useMemo(() => findCurrencySymbol(state.currency), [state.currency]);
 
   // Forms
-  const transactionForm = useForm<z.infer<typeof transactionSchema>>({
-    resolver: zodResolver(transactionSchema),
+  const spendingForm = useForm<z.infer<typeof spendingSchema>>({
+    resolver: zodResolver(spendingSchema),
     defaultValues: { date: format(new Date(), 'yyyy-MM-dd'), description: '', amount: 0, category: 'Food' },
   });
 
@@ -81,16 +81,16 @@ export default function StuSaveApp() {
   });
 
   // Calculations
-  const totalExpenses = useMemo(() => state.transactions.reduce((sum, t) => sum + t.amount, 0), [state.transactions]);
+  const totalExpenses = useMemo(() => state.spendings.reduce((sum, t) => sum + t.amount, 0), [state.spendings]);
   const balance = useMemo(() => state.income - totalExpenses, [state.income, totalExpenses]);
   
   const monthlyExpenses = useMemo(() => {
     const start = startOfMonth(new Date());
     const end = new Date();
-    return state.transactions
+    return state.spendings
       .filter(t => isWithinInterval(new Date(t.date), { start, end }))
       .reduce((sum, t) => sum + t.amount, 0);
-  }, [state.transactions]);
+  }, [state.spendings]);
   
   const budgetRemaining = useMemo(() => state.budget - monthlyExpenses, [state.budget, monthlyExpenses]);
   const budgetProgress = useMemo(() => (state.budget > 0 ? (monthlyExpenses / state.budget) * 100 : 0), [state.budget, monthlyExpenses]);
@@ -109,16 +109,16 @@ export default function StuSaveApp() {
 
 
   // Handlers
-  const handleAddTransaction = (values: z.infer<typeof transactionSchema>) => {
-    dispatch({ type: 'ADD_TRANSACTION', payload: { ...values, id: crypto.randomUUID() } });
-    toast({ title: "Success!", description: "Transaction added." });
-    transactionForm.reset({ date: format(new Date(), 'yyyy-MM-dd'), description: '', amount: 0, category: 'Food' });
-    setAddTransactionOpen(false);
+  const handleAddSpending = (values: z.infer<typeof spendingSchema>) => {
+    dispatch({ type: 'ADD_SPENDING', payload: { ...values, id: crypto.randomUUID() } });
+    toast({ title: "Success!", description: "Spending added." });
+    spendingForm.reset({ date: format(new Date(), 'yyyy-MM-dd'), description: '', amount: 0, category: 'Food' });
+    setAddSpendingOpen(false);
   };
 
-  const handleDeleteTransaction = (id: string) => {
-    dispatch({ type: 'DELETE_TRANSACTION', payload: id });
-    toast({ title: "Transaction Deleted", variant: 'destructive' });
+  const handleDeleteSpending = (id: string) => {
+    dispatch({ type: 'DELETE_SPENDING', payload: id });
+    toast({ title: "Spending Deleted", variant: 'destructive' });
   };
   
   const handleSetFinances = (values: z.infer<typeof financesSchema>) => {
@@ -163,10 +163,10 @@ export default function StuSaveApp() {
                   <motion.div layoutId="active-tab-indicator" className="absolute inset-0 rounded-md bg-card shadow-sm" transition={{ type: "spring", stiffness: 350, damping: 30 }}/>
               )}
             </TabsTrigger>
-            <TabsTrigger value="transactions" className="relative flex flex-col sm:flex-row gap-2 py-2">
+            <TabsTrigger value="spendings" className="relative flex flex-col sm:flex-row gap-2 py-2">
               <ArrowLeftRight className="z-10" />
-              <span className="z-10">Transactions</span>
-               {activeTab === 'transactions' && (
+              <span className="z-10">Spendings</span>
+               {activeTab === 'spendings' && (
                   <motion.div layoutId="active-tab-indicator" className="absolute inset-0 rounded-md bg-card shadow-sm" transition={{ type: "spring", stiffness: 350, damping: 30 }}/>
               )}
             </TabsTrigger>
@@ -256,7 +256,7 @@ export default function StuSaveApp() {
                   <CardDescription>How you're spending your money this month.</CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <CategoryPieChart transactions={state.transactions.filter(t => isWithinInterval(new Date(t.date), { start: startOfMonth(new Date()), end: new Date() }))} />
+                  <CategoryPieChart spendings={state.spendings.filter(t => isWithinInterval(new Date(t.date), { start: startOfMonth(new Date()), end: new Date() }))} />
                 </CardContent>
               </Card>
               <Card className="md:col-span-2 lg:col-span-3">
@@ -282,47 +282,47 @@ export default function StuSaveApp() {
             </div>
           </TabsContent>
 
-          <TabsContent value="transactions" className="mt-6">
+          <TabsContent value="spendings" className="mt-6">
             <Card>
                 <CardHeader className="flex flex-row items-center justify-between">
                     <div>
-                        <CardTitle>Transaction History</CardTitle>
+                        <CardTitle>Spending History</CardTitle>
                         <CardDescription>All your logged expenses.</CardDescription>
                     </div>
                     <div className="flex items-center gap-2">
-                      <Dialog open={isAddTransactionOpen} onOpenChange={setAddTransactionOpen}>
+                      <Dialog open={isAddSpendingOpen} onOpenChange={setAddSpendingOpen}>
                         <DialogTrigger asChild>
-                          <Button><PlusCircle className="mr-2 h-4 w-4"/> Add Transaction</Button>
+                          <Button><PlusCircle className="mr-2 h-4 w-4"/> Add Spending</Button>
                         </DialogTrigger>
                         <DialogContent className="sm:max-w-md">
                           <DialogHeader>
-                            <DialogTitle>Add a New Transaction</DialogTitle>
+                            <DialogTitle>Add a New Spending</DialogTitle>
                              <DialogDescription>
                               Enter the details for your new expense record.
                             </DialogDescription>
                           </DialogHeader>
-                          <form onSubmit={transactionForm.handleSubmit(handleAddTransaction)} className="space-y-4 pt-2">
+                          <form onSubmit={spendingForm.handleSubmit(handleAddSpending)} className="space-y-4 pt-2">
                              <div className="grid grid-cols-2 gap-4">
                                <div className="space-y-2">
                                 <Label htmlFor="amount">Amount ({currencySymbol})</Label>
-                                <Input id="amount" type="number" placeholder="0.00" {...transactionForm.register("amount")} />
-                                {transactionForm.formState.errors.amount && <p className="text-destructive text-sm">{transactionForm.formState.errors.amount.message}</p>}
+                                <Input id="amount" type="number" placeholder="0.00" {...spendingForm.register("amount")} />
+                                {spendingForm.formState.errors.amount && <p className="text-destructive text-sm">{spendingForm.formState.errors.amount.message}</p>}
                               </div>
                               <div className="space-y-2">
                                  <Label htmlFor="date">Date</Label>
-                                 <Input id="date" type="date" {...transactionForm.register("date")} />
-                                 {transactionForm.formState.errors.date && <p className="text-destructive text-sm">{transactionForm.formState.errors.date.message}</p>}
+                                 <Input id="date" type="date" {...spendingForm.register("date")} />
+                                 {spendingForm.formState.errors.date && <p className="text-destructive text-sm">{spendingForm.formState.errors.date.message}</p>}
                                </div>
                              </div>
                              <div className="space-y-2">
                               <Label htmlFor="description">Description</Label>
-                              <Input id="description" placeholder="e.g. Lunch with colleagues" {...transactionForm.register("description")} />
-                              {transactionForm.formState.errors.description && <p className="text-destructive text-sm">{transactionForm.formState.errors.description.message}</p>}
+                              <Input id="description" placeholder="e.g. Lunch with colleagues" {...spendingForm.register("description")} />
+                              {spendingForm.formState.errors.description && <p className="text-destructive text-sm">{spendingForm.formState.errors.description.message}</p>}
                             </div>
                              <div className="space-y-2">
                               <Label htmlFor="category">Category</Label>
                               <Controller
-                                  control={transactionForm.control}
+                                  control={spendingForm.control}
                                   name="category"
                                   render={({ field }) => (
                                       <Select onValueChange={field.onChange} defaultValue={field.value}>
@@ -342,13 +342,13 @@ export default function StuSaveApp() {
                                           </SelectContent>
                                       </Select>
                                   )} />
-                              {transactionForm.formState.errors.category && <p className="text-destructive text-sm">{transactionForm.formState.errors.category.message}</p>}
+                              {spendingForm.formState.errors.category && <p className="text-destructive text-sm">{spendingForm.formState.errors.category.message}</p>}
                              </div>
                              <DialogFooter className="pt-4">
                                <DialogClose asChild>
                                  <Button type="button" variant="outline">Cancel</Button>
                                </DialogClose>
-                               <Button type="submit">Save Transaction</Button>
+                               <Button type="submit">Save Spending</Button>
                              </DialogFooter>
                           </form>
                         </DialogContent>
@@ -356,7 +356,7 @@ export default function StuSaveApp() {
                     </div>
                 </CardHeader>
                 <CardContent>
-                   <TransactionList transactions={state.transactions} onDelete={handleDeleteTransaction} currencySymbol={currencySymbol}/>
+                   <SpendingList spendings={state.spendings} onDelete={handleDeleteSpending} currencySymbol={currencySymbol}/>
                 </CardContent>
             </Card>
           </TabsContent>
@@ -463,7 +463,7 @@ export default function StuSaveApp() {
                             <AlertDialogContent>
                                 <AlertDialogHeader>
                                     <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
-                                    <AlertDialogDescription>This action cannot be undone. This will permanently delete all your transactions, budget, and goals.</AlertDialogDescription>
+                                    <AlertDialogDescription>This action cannot be undone. This will permanently delete all your spendings, budget, and goals.</AlertDialogDescription>
                                 </AlertDialogHeader>
                                 <AlertDialogFooter>
                                     <AlertDialogCancel>Cancel</AlertDialogCancel>
@@ -481,27 +481,27 @@ export default function StuSaveApp() {
   );
 }
 
-function TransactionList({ transactions, onDelete, currencySymbol }: { transactions: Transaction[], onDelete: (id: string) => void, currencySymbol: string }) {
+function SpendingList({ spendings, onDelete, currencySymbol }: { spendings: Spending[], onDelete: (id: string) => void, currencySymbol: string }) {
     const [filter, setFilter] = useState('month');
 
-    const filteredTransactions = useMemo(() => {
+    const filteredSpendings = useMemo(() => {
         const now = new Date();
         if (filter === 'today') {
-            return transactions.filter(t => format(new Date(t.date), 'yyyy-MM-dd') === format(now, 'yyyy-MM-dd'));
+            return spendings.filter(t => format(new Date(t.date), 'yyyy-MM-dd') === format(now, 'yyyy-MM-dd'));
         }
         if (filter === 'week') {
             const start = startOfWeek(now);
             const end = now;
-            return transactions.filter(t => isWithinInterval(new Date(t.date), { start, end }));
+            return spendings.filter(t => isWithinInterval(new Date(t.date), { start, end }));
         }
         // month
         const start = startOfMonth(now);
         const end = now;
-        return transactions.filter(t => isWithinInterval(new Date(t.date), { start, end }));
-    }, [filter, transactions]);
+        return spendings.filter(t => isWithinInterval(new Date(t.date), { start, end }));
+    }, [filter, spendings]);
 
-    if (transactions.length === 0) {
-        return <div className="text-center py-12"><p className="text-muted-foreground">No transactions yet. Add one to get started!</p></div>
+    if (spendings.length === 0) {
+        return <div className="text-center py-12"><p className="text-muted-foreground">No spendings yet. Add one to get started!</p></div>
     }
 
     return (
@@ -520,7 +520,7 @@ function TransactionList({ transactions, onDelete, currencySymbol }: { transacti
             </div>
             <ScrollArea className="h-[400px]">
                 <ul className="space-y-3 pr-4">
-                    {filteredTransactions.map(t => {
+                    {filteredSpendings.map(t => {
                         const Icon = findCategoryIcon(t.category);
                         return (
                             <li key={t.id} className="flex items-center justify-between p-3 rounded-lg border bg-card hover:bg-muted/50 transition-colors animate-in fade-in-0 slide-in-from-top-2 duration-300">
@@ -543,8 +543,8 @@ function TransactionList({ transactions, onDelete, currencySymbol }: { transacti
                                         </AlertDialogTrigger>
                                         <AlertDialogContent>
                                             <AlertDialogHeader>
-                                                <AlertDialogTitle>Delete Transaction?</AlertDialogTitle>
-                                                <AlertDialogDescription>Are you sure you want to delete this transaction? This cannot be undone.</AlertDialogDescription>
+                                                <AlertDialogTitle>Delete Spending?</AlertDialogTitle>
+                                                <AlertDialogDescription>Are you sure you want to delete this spending? This cannot be undone.</AlertDialogDescription>
                                             </AlertDialogHeader>
                                             <AlertDialogFooter>
                                                 <AlertDialogCancel>Cancel</AlertDialogCancel>
@@ -557,7 +557,7 @@ function TransactionList({ transactions, onDelete, currencySymbol }: { transacti
                         );
                     })}
                 </ul>
-                {filteredTransactions.length === 0 && <div className="text-center py-12"><p className="text-muted-foreground">No transactions for this period.</p></div>}
+                {filteredSpendings.length === 0 && <div className="text-center py-12"><p className="text-muted-foreground">No spendings for this period.</p></div>}
             </ScrollArea>
         </div>
     )
@@ -788,19 +788,19 @@ function AdvisorView({ currencySymbol }: { currencySymbol: string }) {
         setLoading(true);
         setAdvice('');
         try {
-            const spendingSummary = state.transactions
-                .slice(0, 10) // a summary of recent transactions
+            const spendingSummary = state.spendings
+                .slice(0, 10) // a summary of recent spendings
                 .map(t => `${t.category}: ${currencySymbol}${t.amount}`)
                 .join(', ');
             
             if (!spendingSummary) {
-                setAdvice("You haven't logged any spending yet. Add some transactions to get personalized advice!");
+                setAdvice("You haven't logged any spending yet. Add some spendings to get personalized advice!");
                 setLoading(false);
                 return;
             }
 
             const result = await getSmartAdvice({
-                spendingSummary: `Recent spending: ${spendingSummary}. Total spent this month: ${state.transactions.reduce((s,t) => s+t.amount,0)}`,
+                spendingSummary: `Recent spending: ${spendingSummary}. Total spent this month: ${state.spendings.reduce((s,t) => s+t.amount,0)}`,
                 budget: state.budget,
             });
             setAdvice(result.advice);

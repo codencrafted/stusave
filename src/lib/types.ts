@@ -3,7 +3,7 @@ export type Currency = 'INR' | 'USD' | 'EUR' | 'GBP' | 'JPY';
 export type LendBorrowType = 'credit' | 'debit'; // 'credit' = I borrowed, 'debit' = I lent
 export type LendBorrowStatus = 'pending' | 'paid';
 
-export interface Transaction {
+export interface Spending {
   id: string;
   amount: number;
   category: Category;

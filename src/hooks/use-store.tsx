@@ -1,20 +1,20 @@
 "use client"
 
 import React, { createContext, useContext, useReducer, useEffect, type ReactNode } from 'react';
-import type { Transaction, SavingsGoal, Currency, CreditDebitRecord, LendBorrowStatus } from '@/lib/types';
+import type { Spending, SavingsGoal, Currency, CreditDebitRecord, LendBorrowStatus } from '@/lib/types';
 
 interface StoreState {
   income: number;
   budget: number;
-  transactions: Transaction[];
+  spendings: Spending[];
   goal: SavingsGoal;
   currency: Currency;
   lendBorrow: CreditDebitRecord[];
 }
 
 type Action =
-  | { type: 'ADD_TRANSACTION'; payload: Transaction }
-  | { type: 'DELETE_TRANSACTION'; payload: string }
+  | { type: 'ADD_SPENDING'; payload: Spending }
+  | { type: 'DELETE_SPENDING'; payload: string }
   | { type: 'SET_FINANCES'; payload: { income: number; budget: number } }
   | { type: 'SET_GOAL'; payload: SavingsGoal }
   | { type: 'SET_CURRENCY'; payload: Currency }
@@ -27,7 +27,7 @@ type Action =
 const initialState: StoreState = {
   income: 5000,
   budget: 3000,
-  transactions: [],
+  spendings: [],
   goal: { name: 'New Laptop', targetAmount: 10000, savedAmount: 0 },
   currency: 'INR',
   lendBorrow: [],
@@ -35,10 +35,10 @@ const initialState: StoreState = {
 
 const storeReducer = (state: StoreState, action: Action): StoreState => {
   switch (action.type) {
-    case 'ADD_TRANSACTION':
-      return { ...state, transactions: [action.payload, ...state.transactions] };
-    case 'DELETE_TRANSACTION':
-      return { ...state, transactions: state.transactions.filter(t => t.id !== action.payload) };
+    case 'ADD_SPENDING':
+      return { ...state, spendings: [action.payload, ...state.spendings] };
+    case 'DELETE_SPENDING':
+      return { ...state, spendings: state.spendings.filter(t => t.id !== action.payload) };
     case 'SET_FINANCES':
       return { ...state, income: action.payload.income, budget: action.payload.budget };
     case 'SET_GOAL':

@@ -10,18 +10,18 @@ import {
   ChartLegend,
   ChartLegendContent
 } from "@/components/ui/chart"
-import type { Transaction } from "@/lib/types"
+import type { Spending } from "@/lib/types"
 import { CATEGORIES } from "@/lib/constants"
 
 interface CategoryPieChartProps {
-  transactions: Transaction[]
+  spendings: Spending[]
 }
 
-export function CategoryPieChart({ transactions }: CategoryPieChartProps) {
+export function CategoryPieChart({ spendings }: CategoryPieChartProps) {
   const chartData = React.useMemo(() => {
-    if (!transactions.length) return [];
+    if (!spendings.length) return [];
 
-    const categoryTotals = transactions.reduce((acc, t) => {
+    const categoryTotals = spendings.reduce((acc, t) => {
       acc[t.category] = (acc[t.category] || 0) + t.amount;
       return acc;
     }, {} as { [key: string]: number });
@@ -31,7 +31,7 @@ export function CategoryPieChart({ transactions }: CategoryPieChartProps) {
       total,
       fill: `var(--color-${category})`
     }));
-  }, [transactions]);
+  }, [spendings]);
 
   const chartConfig = React.useMemo(() => {
     const config: any = {};
@@ -44,11 +44,11 @@ export function CategoryPieChart({ transactions }: CategoryPieChartProps) {
     return config;
   }, []);
 
-  if (!transactions.length) {
+  if (!spendings.length) {
     return (
       <div className="flex flex-col items-center justify-center h-full text-center p-4">
         <p className="text-muted-foreground">No spending data yet.</p>
-        <p className="text-sm text-muted-foreground">Add a transaction to see your spending breakdown.</p>
+        <p className="text-sm text-muted-foreground">Add a spending to see your spending breakdown.</p>
       </div>
     )
   }
