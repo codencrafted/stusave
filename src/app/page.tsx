@@ -60,6 +60,7 @@ export default function StuSaveApp() {
   const { state, dispatch } = useStore();
   const { toast } = useToast();
   const [isAddTransactionOpen, setAddTransactionOpen] = useState(false);
+  const [activeTab, setActiveTab] = useState('dashboard');
 
   const currencySymbol = useMemo(() => findCurrencySymbol(state.currency), [state.currency]);
 
@@ -153,14 +154,50 @@ export default function StuSaveApp() {
   return (
     <div className="min-h-screen bg-background text-foreground flex flex-col items-center p-4 font-body">
       <main className="w-full max-w-4xl mx-auto pt-8">
-        <Tabs defaultValue="dashboard" className="w-full">
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
           <TabsList className="grid w-full grid-cols-3 sm:grid-cols-6 h-auto sm:h-12">
-            <TabsTrigger value="dashboard" className="flex flex-col sm:flex-row gap-2 py-2"><LayoutDashboard />Dashboard</TabsTrigger>
-            <TabsTrigger value="transactions" className="flex flex-col sm:flex-row gap-2 py-2"><ArrowLeftRight />Transactions</TabsTrigger>
-            <TabsTrigger value="lendborrow" className="flex flex-col sm:flex-row gap-2 py-2"><HandCoins />Lend/Borrow</TabsTrigger>
-            <TabsTrigger value="goals" className="flex flex-col sm:flex-row gap-2 py-2"><Target />Goals & Budget</TabsTrigger>
-            <TabsTrigger value="advisor" className="flex flex-col sm:flex-row gap-2 py-2"><Sparkles />AI Advisor</TabsTrigger>
-            <TabsTrigger value="settings" className="flex flex-col sm:flex-row gap-2 py-2"><Settings />Settings</TabsTrigger>
+            <TabsTrigger value="dashboard" className="relative flex flex-col sm:flex-row gap-2 py-2">
+              <LayoutDashboard className="z-10" />
+              <span className="z-10">Dashboard</span>
+              {activeTab === 'dashboard' && (
+                  <motion.div layoutId="active-tab-indicator" className="absolute inset-0 rounded-md bg-background shadow-sm" transition={{ type: "spring", stiffness: 350, damping: 30 }}/>
+              )}
+            </TabsTrigger>
+            <TabsTrigger value="transactions" className="relative flex flex-col sm:flex-row gap-2 py-2">
+              <ArrowLeftRight className="z-10" />
+              <span className="z-10">Transactions</span>
+               {activeTab === 'transactions' && (
+                  <motion.div layoutId="active-tab-indicator" className="absolute inset-0 rounded-md bg-background shadow-sm" transition={{ type: "spring", stiffness: 350, damping: 30 }}/>
+              )}
+            </TabsTrigger>
+            <TabsTrigger value="lendborrow" className="relative flex flex-col sm:flex-row gap-2 py-2">
+              <HandCoins className="z-10" />
+              <span className="z-10">Lend/Borrow</span>
+               {activeTab === 'lendborrow' && (
+                  <motion.div layoutId="active-tab-indicator" className="absolute inset-0 rounded-md bg-background shadow-sm" transition={{ type: "spring", stiffness: 350, damping: 30 }}/>
+              )}
+            </TabsTrigger>
+            <TabsTrigger value="goals" className="relative flex flex-col sm:flex-row gap-2 py-2">
+              <Target className="z-10" />
+              <span className="z-10">Goals & Budget</span>
+               {activeTab === 'goals' && (
+                  <motion.div layoutId="active-tab-indicator" className="absolute inset-0 rounded-md bg-background shadow-sm" transition={{ type: "spring", stiffness: 350, damping: 30 }}/>
+              )}
+            </TabsTrigger>
+            <TabsTrigger value="advisor" className="relative flex flex-col sm:flex-row gap-2 py-2">
+              <Sparkles className="z-10" />
+              <span className="z-10">AI Advisor</span>
+               {activeTab === 'advisor' && (
+                  <motion.div layoutId="active-tab-indicator" className="absolute inset-0 rounded-md bg-background shadow-sm" transition={{ type: "spring", stiffness: 350, damping: 30 }}/>
+              )}
+            </TabsTrigger>
+            <TabsTrigger value="settings" className="relative flex flex-col sm:flex-row gap-2 py-2">
+              <Settings className="z-10" />
+              <span className="z-10">Settings</span>
+               {activeTab === 'settings' && (
+                  <motion.div layoutId="active-tab-indicator" className="absolute inset-0 rounded-md bg-background shadow-sm" transition={{ type: "spring", stiffness: 350, damping: 30 }}/>
+              )}
+            </TabsTrigger>
           </TabsList>
 
           <TabsContent value="dashboard" className="mt-6">
