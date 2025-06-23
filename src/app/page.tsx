@@ -6,8 +6,8 @@ import { useStore } from '@/hooks/use-store';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { ArrowLeftRight, LayoutDashboard, PlusCircle, Settings, Sparkles, PiggyBank, Trash2, HandCoins, Users, CheckCircle2, XCircle, Bell, Lightbulb, ArrowUpRight, ArrowDownLeft } from 'lucide-react';
-import { format, startOfWeek, startOfMonth, isWithinInterval } from 'date-fns';
+import { LayoutDashboard, PlusCircle, Settings, Sparkles, PiggyBank, Trash2, HandCoins, Users, CheckCircle2, XCircle, Bell, Lightbulb, ArrowUpRight, ArrowDownLeft, Wallet } from 'lucide-react';
+import { format, startOfMonth, isWithinInterval } from 'date-fns';
 import { motion, AnimatePresence } from 'framer-motion';
 
 import { getSmartAdvice } from '@/ai/flows/get-smart-advice';
@@ -210,108 +210,52 @@ export default function StuSaveApp() {
           </TabsContent>
 
           <TabsContent value="spendings">
-            <Card>
-                <CardHeader className="flex flex-row items-center justify-between">
-                    <div>
-                        <CardTitle>Spending History</CardTitle>
-                        <CardDescription>All your logged expenses.</CardDescription>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <Dialog open={isAddSpendingOpen} onOpenChange={setAddSpendingOpen}>
-                        <DialogTrigger asChild>
-                          <Button><PlusCircle className="mr-2 h-4 w-4"/> Add Spending</Button>
-                        </DialogTrigger>
-                        <DialogContent className="sm:max-w-md">
-                          <DialogHeader>
-                            <DialogTitle>Add a New Spending</DialogTitle>
-                             <DialogDescription>
-                              Enter the details for your new expense record.
-                            </DialogDescription>
-                          </DialogHeader>
-                          <form onSubmit={spendingForm.handleSubmit(handleAddSpending)} className="space-y-4 pt-2">
-                             <div className="grid grid-cols-2 gap-4">
-                               <div className="space-y-2">
-                                <Label htmlFor="amount">Amount ({currencySymbol})</Label>
-                                <Input id="amount" type="number" placeholder="0.00" {...spendingForm.register("amount")} />
-                                {spendingForm.formState.errors.amount && <p className="text-destructive text-sm">{spendingForm.formState.errors.amount.message}</p>}
-                              </div>
-                              <div className="space-y-2">
-                                 <Label htmlFor="date">Date</Label>
-                                 <Input id="date" type="date" {...spendingForm.register("date")} />
-                                 {spendingForm.formState.errors.date && <p className="text-destructive text-sm">{spendingForm.formState.errors.date.message}</p>}
-                               </div>
-                             </div>
-                             <div className="space-y-2">
-                              <Label htmlFor="description">Description</Label>
-                              <Input id="description" placeholder="e.g. Lunch with colleagues" {...spendingForm.register("description")} />
-                              {spendingForm.formState.errors.description && <p className="text-destructive text-sm">{spendingForm.formState.errors.description.message}</p>}
+             <div className="space-y-6">
+                <Card>
+                    <CardHeader>
+                        <CardTitle>My Finances</CardTitle>
+                        <CardDescription>Set your monthly income and budget to track your progress.</CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                        <form onSubmit={financesForm.handleSubmit(handleSetFinances)} className="grid sm:grid-cols-3 gap-4 items-end">
+                            <div className="space-y-2 sm:col-span-1">
+                                <Label htmlFor="income">Monthly Income ({currencySymbol})</Label>
+                                <Input id="income" type="number" placeholder="e.g. 5000" {...financesForm.register("income")} />
+                                 {financesForm.formState.errors.income && <p className="text-destructive text-sm">{financesForm.formState.errors.income.message}</p>}
                             </div>
-                             <div className="space-y-2">
-                              <Label htmlFor="category">Category</Label>
-                              <Controller
-                                  control={spendingForm.control}
-                                  name="category"
-                                  render={({ field }) => (
-                                      <Select onValueChange={field.onChange} defaultValue={field.value}>
-                                          <SelectTrigger><SelectValue placeholder="Select a category" /></SelectTrigger>
-                                          <SelectContent>
-                                              {CATEGORIES.map(c => {
-                                                const Icon = c.icon;
-                                                return (
-                                                  <SelectItem key={c.name} value={c.name}>
-                                                    <div className="flex items-center gap-3">
-                                                      <Icon className="h-4 w-4 text-muted-foreground" />
-                                                      <span>{c.name}</span>
-                                                    </div>
-                                                  </SelectItem>
-                                                )
-                                              })}
-                                          </SelectContent>
-                                      </Select>
-                                  )} />
-                              {spendingForm.formState.errors.category && <p className="text-destructive text-sm">{spendingForm.formState.errors.category.message}</p>}
-                             </div>
-                             <DialogFooter className="pt-4">
-                               <DialogClose asChild>
-                                 <Button type="button" variant="outline">Cancel</Button>
-                               </DialogClose>
-                               <Button type="submit">Save Spending</Button>
-                             </DialogFooter>
-                          </form>
-                        </DialogContent>
-                      </Dialog>
-                    </div>
-                </CardHeader>
-                <CardContent>
-                   <SpendingList spendings={state.spendings} onDelete={handleDeleteSpending} currencySymbol={currencySymbol}/>
-                </CardContent>
-            </Card>
-          </TabsContent>
-          
-          <TabsContent value="lendborrow">
-            <LendBorrowView currencySymbol={currencySymbol} />
-          </TabsContent>
+                            <div className="space-y-2 sm:col-span-1">
+                                <Label htmlFor="budget">Monthly Budget ({currencySymbol})</Label>
+                                <Input id="budget" type="number" placeholder="e.g. 3000" {...financesForm.register("budget")} />
+                                {financesForm.formState.errors.budget && <p className="text-destructive text-sm">{financesForm.formState.errors.budget.message}</p>}
+                            </div>
+                            <Button type="submit" className="w-full sm:w-auto">Save Finances</Button>
+                        </form>
+                    </CardContent>
+                </Card>
 
-          <TabsContent value="budget">
-            <Card>
-                <CardHeader>
-                    <CardTitle>Finances</CardTitle>
-                    <CardDescription>Set your monthly income and budget.</CardDescription>
-                </CardHeader>
-                <CardContent>
-                    <form onSubmit={financesForm.handleSubmit(handleSetFinances)} className="space-y-4">
-                        <div className="space-y-2">
-                            <Label htmlFor="income">Monthly Income ({currencySymbol})</Label>
-                            <Input id="income" type="number" {...financesForm.register("income")} />
-                        </div>
-                        <div className="space-y-2">
-                            <Label htmlFor="budget">Monthly Budget ({currencySymbol})</Label>
-                            <Input id="budget" type="number" {...financesForm.register("budget")} />
-                        </div>
-                        <Button type="submit">Save Finances</Button>
-                    </form>
-                </CardContent>
-            </Card>
+                <Card>
+                    <Tabs defaultValue="history" className="w-full">
+                      <TabsList className="grid w-full grid-cols-2 rounded-b-none rounded-t-lg">
+                        <TabsTrigger value="history">Spending History</TabsTrigger>
+                        <TabsTrigger value="lendborrow">Lend & Borrow</TabsTrigger>
+                      </TabsList>
+                      <CardContent className="pt-6">
+                        <TabsContent value="history">
+                           <div className="flex items-center justify-between mb-4 -mt-2">
+                              <div>
+                                  <h3 className="text-lg font-semibold">My Spendings</h3>
+                                  <p className="text-sm text-muted-foreground">All your logged expenses.</p>
+                              </div>
+                          </div>
+                          <SpendingList spendings={state.spendings} onDelete={handleDeleteSpending} currencySymbol={currencySymbol}/>
+                        </TabsContent>
+                        <TabsContent value="lendborrow" className="-mt-2">
+                          <LendBorrowView currencySymbol={currencySymbol} />
+                        </TabsContent>
+                      </CardContent>
+                    </Tabs>
+                </Card>
+            </div>
           </TabsContent>
 
           <TabsContent value="advisor">
@@ -380,8 +324,8 @@ export default function StuSaveApp() {
         </main>
         
         <footer className="fixed bottom-0 left-0 right-0 z-50 border-t bg-background/95 backdrop-blur-sm">
-            <TabsList className="grid h-auto w-full max-w-4xl grid-cols-5 mx-auto bg-transparent p-1 text-muted-foreground">
-                <TabsTrigger value="dashboard" className="relative flex flex-col items-center justify-center gap-1 p-2 h-auto">
+            <div className="grid h-auto w-full max-w-4xl grid-cols-5 mx-auto p-1 text-muted-foreground">
+                <TabsTrigger value="dashboard" className="relative flex flex-col items-center justify-center gap-1 p-2 h-auto data-[state=active]:text-primary">
                     <motion.div 
                         className="flex flex-col items-center justify-center gap-1 z-10"
                         animate={{ y: activeTab === 'dashboard' ? -6 : 0 }}
@@ -390,50 +334,87 @@ export default function StuSaveApp() {
                         <LayoutDashboard />
                         <span className="text-xs">Dashboard</span>
                     </motion.div>
-                    {activeTab === 'dashboard' && (
-                        <motion.div layoutId="active-tab-indicator" className="absolute inset-0 rounded-md bg-card shadow-sm" transition={{ type: "spring", stiffness: 350, damping: 30 }}/>
-                    )}
                 </TabsTrigger>
-                <TabsTrigger value="budget" className="relative flex flex-col items-center justify-center gap-1 p-2 h-auto">
-                    <motion.div 
-                        className="flex flex-col items-center justify-center gap-1 z-10"
-                        animate={{ y: activeTab === 'budget' ? -6 : 0 }}
-                        transition={{ type: "spring", stiffness: 400, damping: 25 }}
-                    >
-                        <PiggyBank />
-                        <span className="text-xs">Budget</span>
-                    </motion.div>
-                    {activeTab === 'budget' && (
-                        <motion.div layoutId="active-tab-indicator" className="absolute inset-0 rounded-md bg-card shadow-sm" transition={{ type: "spring", stiffness: 350, damping: 30 }}/>
-                    )}
-                </TabsTrigger>
-                <TabsTrigger value="spendings" className="relative flex flex-col items-center justify-center gap-1 p-2 h-auto">
+                <TabsTrigger value="spendings" className="relative flex flex-col items-center justify-center gap-1 p-2 h-auto data-[state=active]:text-primary">
                     <motion.div 
                         className="flex flex-col items-center justify-center gap-1 z-10"
                         animate={{ y: activeTab === 'spendings' ? -6 : 0 }}
                         transition={{ type: "spring", stiffness: 400, damping: 25 }}
                     >
-                        <PlusCircle className="h-7 w-7 text-primary" />
+                        <Wallet />
                         <span className="text-xs">Spendings</span>
                     </motion.div>
-                    {activeTab === 'spendings' && (
-                        <motion.div layoutId="active-tab-indicator" className="absolute inset-0 rounded-md bg-card shadow-sm" transition={{ type: "spring", stiffness: 350, damping: 30 }}/>
-                    )}
                 </TabsTrigger>
-                <TabsTrigger value="lendborrow" className="relative flex flex-col items-center justify-center gap-1 p-2 h-auto">
-                    <motion.div 
-                        className="flex flex-col items-center justify-center gap-1 z-10"
-                        animate={{ y: activeTab === 'lendborrow' ? -6 : 0 }}
-                        transition={{ type: "spring", stiffness: 400, damping: 25 }}
-                    >
-                        <HandCoins />
-                        <span className="text-xs">Lend/Borrow</span>
-                    </motion.div>
-                    {activeTab === 'lendborrow' && (
-                        <motion.div layoutId="active-tab-indicator" className="absolute inset-0 rounded-md bg-card shadow-sm" transition={{ type: "spring", stiffness: 350, damping: 30 }}/>
-                    )}
-                </TabsTrigger>
-                <TabsTrigger value="advisor" className="relative flex flex-col items-center justify-center gap-1 p-2 h-auto">
+
+                <div className="flex items-center justify-center">
+                   <Dialog open={isAddSpendingOpen} onOpenChange={setAddSpendingOpen}>
+                      <DialogTrigger asChild>
+                         <Button size="icon" className="rounded-full h-14 w-14 shadow-lg -translate-y-4">
+                            <PlusCircle className="h-7 w-7" />
+                        </Button>
+                      </DialogTrigger>
+                      <DialogContent className="sm:max-w-md">
+                        <DialogHeader>
+                          <DialogTitle>Add a New Spending</DialogTitle>
+                           <DialogDescription>
+                            Enter the details for your new expense record.
+                          </DialogDescription>
+                        </DialogHeader>
+                        <form onSubmit={spendingForm.handleSubmit(handleAddSpending)} className="space-y-4 pt-2">
+                           <div className="grid grid-cols-2 gap-4">
+                             <div className="space-y-2">
+                              <Label htmlFor="amount">Amount ({currencySymbol})</Label>
+                              <Input id="amount" type="number" placeholder="0.00" {...spendingForm.register("amount")} />
+                              {spendingForm.formState.errors.amount && <p className="text-destructive text-sm">{spendingForm.formState.errors.amount.message}</p>}
+                            </div>
+                            <div className="space-y-2">
+                               <Label htmlFor="date">Date</Label>
+                               <Input id="date" type="date" {...spendingForm.register("date")} />
+                               {spendingForm.formState.errors.date && <p className="text-destructive text-sm">{spendingForm.formState.errors.date.message}</p>}
+                             </div>
+                           </div>
+                           <div className="space-y-2">
+                            <Label htmlFor="description">Description</Label>
+                            <Input id="description" placeholder="e.g. Lunch with colleagues" {...spendingForm.register("description")} />
+                            {spendingForm.formState.errors.description && <p className="text-destructive text-sm">{spendingForm.formState.errors.description.message}</p>}
+                          </div>
+                           <div className="space-y-2">
+                            <Label htmlFor="category">Category</Label>
+                            <Controller
+                                control={spendingForm.control}
+                                name="category"
+                                render={({ field }) => (
+                                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                        <SelectTrigger><SelectValue placeholder="Select a category" /></SelectTrigger>
+                                        <SelectContent>
+                                            {CATEGORIES.map(c => {
+                                              const Icon = c.icon;
+                                              return (
+                                                <SelectItem key={c.name} value={c.name}>
+                                                  <div className="flex items-center gap-3">
+                                                    <Icon className="h-4 w-4 text-muted-foreground" />
+                                                    <span>{c.name}</span>
+                                                  </div>
+                                                </SelectItem>
+                                              )
+                                            })}
+                                        </SelectContent>
+                                    </Select>
+                                )} />
+                            {spendingForm.formState.errors.category && <p className="text-destructive text-sm">{spendingForm.formState.errors.category.message}</p>}
+                           </div>
+                           <DialogFooter className="pt-4">
+                             <DialogClose asChild>
+                               <Button type="button" variant="outline">Cancel</Button>
+                             </DialogClose>
+                             <Button type="submit">Save Spending</Button>
+                           </DialogFooter>
+                        </form>
+                      </DialogContent>
+                    </Dialog>
+                </div>
+
+                <TabsTrigger value="advisor" className="relative flex flex-col items-center justify-center gap-1 p-2 h-auto data-[state=active]:text-primary">
                     <motion.div 
                         className="flex flex-col items-center justify-center gap-1 z-10"
                         animate={{ y: activeTab === 'advisor' ? -6 : 0 }}
@@ -442,11 +423,18 @@ export default function StuSaveApp() {
                         <Sparkles />
                         <span className="text-xs">AI Advisor</span>
                     </motion.div>
-                    {activeTab === 'advisor' && (
-                        <motion.div layoutId="active-tab-indicator" className="absolute inset-0 rounded-md bg-card shadow-sm" transition={{ type: "spring", stiffness: 350, damping: 30 }}/>
-                    )}
                 </TabsTrigger>
-            </TabsList>
+                <TabsTrigger value="settings" className="relative flex flex-col items-center justify-center gap-1 p-2 h-auto data-[state=active]:text-primary">
+                    <motion.div 
+                        className="flex flex-col items-center justify-center gap-1 z-10"
+                        animate={{ y: activeTab === 'settings' ? -6 : 0 }}
+                        transition={{ type: "spring", stiffness: 400, damping: 25 }}
+                    >
+                        <Settings />
+                        <span className="text-xs">Settings</span>
+                    </motion.div>
+                </TabsTrigger>
+            </div>
         </footer>
       </Tabs>
     </div>
@@ -586,11 +574,11 @@ function LendBorrowView({ currencySymbol }: { currencySymbol: string }) {
     }, [state.lendBorrow]);
 
     return (
-        <Card>
-            <CardHeader className="flex flex-row items-center justify-between">
+        <div>
+            <div className="flex flex-row items-center justify-between mb-4">
                 <div>
-                    <CardTitle>Lend & Borrow Tracker</CardTitle>
-                    <CardDescription>Manage money shared with your friends.</CardDescription>
+                    <h3 className="text-lg font-semibold">Lend & Borrow Tracker</h3>
+                    <p className="text-sm text-muted-foreground">Manage money shared with your friends.</p>
                 </div>
                 <Dialog open={isAddLendBorrowOpen} onOpenChange={setAddLendBorrowOpen}>
                     <DialogTrigger asChild>
@@ -657,22 +645,20 @@ function LendBorrowView({ currencySymbol }: { currencySymbol: string }) {
                         </form>
                     </DialogContent>
                 </Dialog>
-            </CardHeader>
-            <CardContent>
-                <Tabs defaultValue="lent">
-                    <TabsList className="grid w-full grid-cols-2">
-                        <TabsTrigger value="lent">Money I Lent</TabsTrigger>
-                        <TabsTrigger value="borrowed">Money I Borrowed</TabsTrigger>
-                    </TabsList>
-                    <TabsContent value="lent" className="mt-4">
-                        <RecordList records={lent} type="debit" currencySymbol={currencySymbol} onToggleStatus={handleToggleStatus} onDelete={handleDeleteRecord} />
-                    </TabsContent>
-                    <TabsContent value="borrowed" className="mt-4">
-                        <RecordList records={borrowed} type="credit" currencySymbol={currencySymbol} onToggleStatus={handleToggleStatus} onDelete={handleDeleteRecord} />
-                    </TabsContent>
-                </Tabs>
-            </CardContent>
-        </Card>
+            </div>
+            <Tabs defaultValue="lent">
+                <TabsList className="grid w-full grid-cols-2">
+                    <TabsTrigger value="lent">Money I Lent</TabsTrigger>
+                    <TabsTrigger value="borrowed">Money I Borrowed</TabsTrigger>
+                </TabsList>
+                <TabsContent value="lent" className="mt-4">
+                    <RecordList records={lent} type="debit" currencySymbol={currencySymbol} onToggleStatus={handleToggleStatus} onDelete={handleDeleteRecord} />
+                </TabsContent>
+                <TabsContent value="borrowed" className="mt-4">
+                    <RecordList records={borrowed} type="credit" currencySymbol={currencySymbol} onToggleStatus={handleToggleStatus} onDelete={handleDeleteRecord} />
+                </TabsContent>
+            </Tabs>
+        </div>
     )
 }
 
@@ -843,3 +829,5 @@ function AdvisorView({ currencySymbol }: { currencySymbol: string }) {
         </Card>
     );
 }
+
+    
