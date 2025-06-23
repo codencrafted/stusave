@@ -167,12 +167,13 @@ export default function StuSaveApp() {
     }
     const tabWidth = navWidth / navTabs.length;
     const curveWidth = 80;
+    const curveDepth = 35; // Height of the curve
     const curveStart = (activeIndex * tabWidth) + (tabWidth - curveWidth) / 2;
     const curveEnd = curveStart + curveWidth;
     const curveCenter = curveStart + curveWidth / 2;
-    const curveDepth = 35;
+    const topY = 20; // Y-position of the nav bar's top line
 
-    return `M 0 15 L ${curveStart} 15 C ${curveStart + 10} 15, ${curveCenter - 30} ${curveDepth}, ${curveCenter} ${curveDepth} S ${curveEnd - 10} 15, ${curveEnd} 15 L ${navWidth} 15 L ${navWidth} 80 L 0 80 Z`;
+    return `M 0 ${topY} L ${curveStart} ${topY} C ${curveStart + 20} ${topY}, ${curveCenter - 30} ${topY - curveDepth}, ${curveCenter} ${topY - curveDepth} S ${curveEnd - 20} ${topY}, ${curveEnd} ${topY} L ${navWidth} ${topY} L ${navWidth} 80 L 0 80 Z`;
   }, [navWidth, activeIndex, navTabs.length]);
 
 
@@ -464,7 +465,7 @@ export default function StuSaveApp() {
                     return (
                         <TabsTrigger key={tab.name} value={tab.name!} className="flex flex-col items-center justify-center gap-1 p-2 h-full data-[state=active]:text-primary">
                             <motion.div
-                                animate={{ y: isActive ? -12 : 0 }}
+                                animate={{ y: isActive ? -28 : 0 }}
                                 transition={{ type: 'spring', stiffness: 300, damping: 20 }}
                                 className="flex flex-col items-center justify-center gap-1"
                             >
@@ -896,6 +897,7 @@ function AdvisorView({ currencySymbol }: { currencySymbol: string }) {
     
 
     
+
 
 
 
