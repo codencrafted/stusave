@@ -1,13 +1,14 @@
 "use client"
 
 import React, { createContext, useContext, useReducer, useEffect, type ReactNode } from 'react';
-import type { Transaction, SavingsGoal } from '@/lib/types';
+import type { Transaction, SavingsGoal, Currency } from '@/lib/types';
 
 interface StoreState {
   income: number;
   budget: number;
   transactions: Transaction[];
   goal: SavingsGoal;
+  currency: Currency;
 }
 
 type Action =
@@ -15,14 +16,16 @@ type Action =
   | { type: 'DELETE_TRANSACTION'; payload: string }
   | { type: 'SET_FINANCES'; payload: { income: number; budget: number } }
   | { type: 'SET_GOAL'; payload: SavingsGoal }
+  | { type: 'SET_CURRENCY'; payload: Currency }
   | { type: 'RESET_DATA' }
-  | { type: 'HYDRATE'; payload: StoreState };
+  | { type: 'HYDRATE'; payload: Partial<StoreState> };
 
 const initialState: StoreState = {
   income: 5000,
   budget: 3000,
   transactions: [],
   goal: { name: 'New Laptop', targetAmount: 10000, savedAmount: 0 },
+  currency: 'INR',
 };
 
 const storeReducer = (state: StoreState, action: Action): StoreState => {
@@ -35,6 +38,8 @@ const storeReducer = (state: StoreState, action: Action): StoreState => {
       return { ...state, income: action.payload.income, budget: action.payload.budget };
     case 'SET_GOAL':
       return { ...state, goal: action.payload };
+    case 'SET_CURRENCY':
+      return { ...state, currency: action.payload };
     case 'RESET_DATA':
       return initialState;
     case 'HYDRATE':

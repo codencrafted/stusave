@@ -1,4 +1,5 @@
 export type Category = 'Food' | 'Books' | 'Travel' | 'Shopping' | 'Entertainment' | 'Utilities' | 'Other';
+export type Currency = 'INR' | 'USD' | 'EUR' | 'GBP' | 'JPY';
 
 export interface Transaction {
   id: string;

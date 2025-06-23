@@ -1,4 +1,4 @@
-import type { Category } from './types';
+import type { Category, Currency } from './types';
 
 export const CATEGORIES: { name: Category; emoji: string; }[] = [
   { name: 'Food', emoji: '🍕' },
@@ -10,7 +10,20 @@ export const CATEGORIES: { name: Category; emoji: string; }[] = [
   { name: 'Other', emoji: '🤷' },
 ];
 
+export const CURRENCIES: { name: string, code: Currency, symbol: string }[] = [
+  { name: 'Indian Rupee', code: 'INR', symbol: '₹' },
+  { name: 'US Dollar', code: 'USD', symbol: '$' },
+  { name: 'Euro', code: 'EUR', symbol: '€' },
+  { name: 'British Pound', code: 'GBP', symbol: '£' },
+  { name: 'Japanese Yen', code: 'JPY', symbol: '¥' },
+];
+
 export const findCategoryEmoji = (categoryName: Category): string => {
   const category = CATEGORIES.find(c => c.name === categoryName);
   return category ? category.emoji : '🤷';
+};
+
+export const findCurrencySymbol = (currencyCode: Currency): string => {
+  const currency = CURRENCIES.find(c => c.code === currencyCode);
+  return currency ? currency.symbol : '₹';
 };

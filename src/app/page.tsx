@@ -5,8 +5,8 @@ import { useStore } from '@/hooks/use-store';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { ArrowLeftRight, IndianRupee, LayoutDashboard, PlusCircle, Settings, Sparkles, Target, Trash2 } from 'lucide-react';
-import { format, subDays, startOfWeek, startOfMonth, isWithinInterval } from 'date-fns';
+import { ArrowLeftRight, LayoutDashboard, PlusCircle, Settings, Sparkles, Target, Trash2 } from 'lucide-react';
+import { format, startOfWeek, startOfMonth, isWithinInterval } from 'date-fns';
 
 import { getSmartAdvice } from '@/ai/flows/get-smart-advice';
 
@@ -23,8 +23,8 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { useToast } from '@/hooks/use-toast';
 import { CategoryPieChart } from '@/components/category-pie-chart';
 import { ThemeToggle } from '@/components/theme-toggle';
-import { CATEGORIES, findCategoryEmoji } from '@/lib/constants';
-import type { Category, Transaction } from '@/lib/types';
+import { CATEGORIES, findCategoryEmoji, CURRENCIES, findCurrencySymbol } from '@/lib/constants';
+import type { Category, Transaction, Currency } from '@/lib/types';
 import { Skeleton } from '@/components/ui/skeleton';
 
 const transactionSchema = z.object({
@@ -49,6 +49,8 @@ export default function StuSaveApp() {
   const { state, dispatch } = useStore();
   const { toast } = useToast();
   const [isAddTransactionOpen, setAddTransactionOpen] = useState(false);
+
+  const currencySymbol = useMemo(() => findCurrencySymbol(state.currency), [state.currency]);
 
   // Forms
   const transactionForm = useForm<z.infer<typeof transactionSchema>>({
@@ -104,6 +106,11 @@ export default function StuSaveApp() {
     dispatch({ type: 'SET_GOAL', payload: values });
     toast({ title: "Success!", description: "Savings goal updated." });
   };
+
+  const handleSetCurrency = (currencyCode: Currency) => {
+    dispatch({ type: 'SET_CURRENCY', payload: currencyCode });
+    toast({ title: "Success!", description: `Currency set to ${currencyCode}` });
+  };
   
   const handleResetData = () => {
     dispatch({ type: 'RESET_DATA' });
@@ -145,16 +152,16 @@ export default function StuSaveApp() {
                   <CardDescription>Income - Total Expenses</CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <p className="text-4xl font-bold flex items-center"><IndianRupee size={32} className="mr-1"/> {balance.toFixed(2)}</p>
+                  <p className="text-4xl font-bold flex items-center"><span className="mr-2 text-3xl">{currencySymbol}</span>{balance.toFixed(2)}</p>
                 </CardContent>
               </Card>
                <Card className="lg:col-span-1">
                 <CardHeader>
                   <CardTitle>This Month's Budget</CardTitle>
-                  <CardDescription>You've spent {monthlyExpenses.toFixed(2)} so far.</CardDescription>
+                  <CardDescription>You've spent {currencySymbol}{monthlyExpenses.toFixed(2)} so far.</CardDescription>
                 </CardHeader>
                 <CardContent>
-                    <p className={`text-3xl font-bold flex items-center ${budgetRemaining < 0 ? 'text-destructive' : ''}`}><IndianRupee size={28} className="mr-1"/> {budgetRemaining.toFixed(2)} left</p>
+                    <p className={`text-3xl font-bold flex items-center ${budgetRemaining < 0 ? 'text-destructive' : ''}`}><span className="mr-2 text-2xl">{currencySymbol}</span>{budgetRemaining.toFixed(2)} left</p>
                     <Progress value={budgetProgress} className="mt-4 h-3" />
                 </CardContent>
               </Card>
@@ -164,8 +171,8 @@ export default function StuSaveApp() {
                   <CardDescription>{state.goal.name}</CardDescription>
                 </CardHeader>
                 <CardContent>
-                   <p className="text-3xl font-bold flex items-center"><IndianRupee size={28} className="mr-1"/> {state.goal.savedAmount.toFixed(2)}</p>
-                   <p className="text-sm text-muted-foreground">out of {state.goal.targetAmount.toFixed(2)}</p>
+                   <p className="text-3xl font-bold flex items-center"><span className="mr-2 text-2xl">{currencySymbol}</span>{state.goal.savedAmount.toFixed(2)}</p>
+                   <p className="text-sm text-muted-foreground">out of {currencySymbol}{state.goal.targetAmount.toFixed(2)}</p>
                    <Progress value={goalProgress} className="mt-2 h-3" />
                 </CardContent>
               </Card>
@@ -198,7 +205,7 @@ export default function StuSaveApp() {
                         </DialogHeader>
                         <form onSubmit={transactionForm.handleSubmit(handleAddTransaction)} className="space-y-4">
                            <div className="space-y-2">
-                            <Label htmlFor="amount">Amount (₹)</Label>
+                            <Label htmlFor="amount">Amount ({currencySymbol})</Label>
                             <Input id="amount" type="number" {...transactionForm.register("amount")} />
                             {transactionForm.formState.errors.amount && <p className="text-destructive text-sm">{transactionForm.formState.errors.amount.message}</p>}
                           </div>
@@ -238,7 +245,7 @@ export default function StuSaveApp() {
                     </Dialog>
                 </CardHeader>
                 <CardContent>
-                   <TransactionList transactions={state.transactions} onDelete={handleDeleteTransaction}/>
+                   <TransactionList transactions={state.transactions} onDelete={handleDeleteTransaction} currencySymbol={currencySymbol}/>
                 </CardContent>
             </Card>
           </TabsContent>
@@ -253,11 +260,11 @@ export default function StuSaveApp() {
                     <CardContent>
                         <form onSubmit={financesForm.handleSubmit(handleSetFinances)} className="space-y-4">
                             <div className="space-y-2">
-                                <Label htmlFor="income">Monthly Income (₹)</Label>
+                                <Label htmlFor="income">Monthly Income ({currencySymbol})</Label>
                                 <Input id="income" type="number" {...financesForm.register("income")} />
                             </div>
                             <div className="space-y-2">
-                                <Label htmlFor="budget">Monthly Budget (₹)</Label>
+                                <Label htmlFor="budget">Monthly Budget ({currencySymbol})</Label>
                                 <Input id="budget" type="number" {...financesForm.register("budget")} />
                             </div>
                             <Button type="submit">Save Finances</Button>
@@ -276,11 +283,11 @@ export default function StuSaveApp() {
                                 <Input id="goalName" {...goalForm.register("name")} />
                             </div>
                             <div className="space-y-2">
-                                <Label htmlFor="targetAmount">Target Amount (₹)</Label>
+                                <Label htmlFor="targetAmount">Target Amount ({currencySymbol})</Label>
                                 <Input id="targetAmount" type="number" {...goalForm.register("targetAmount")} />
                             </div>
                              <div className="space-y-2">
-                                <Label htmlFor="savedAmount">Currently Saved (₹)</Label>
+                                <Label htmlFor="savedAmount">Currently Saved ({currencySymbol})</Label>
                                 <Input id="savedAmount" type="number" {...goalForm.register("savedAmount")} />
                             </div>
                             <Button type="submit">Set Goal</Button>
@@ -291,7 +298,7 @@ export default function StuSaveApp() {
           </TabsContent>
 
           <TabsContent value="advisor" className="mt-6">
-            <AdvisorView />
+            <AdvisorView currencySymbol={currencySymbol} />
           </TabsContent>
 
           <TabsContent value="settings" className="mt-6">
@@ -307,6 +314,20 @@ export default function StuSaveApp() {
                             <p className="text-sm text-muted-foreground">Toggle between light and dark mode.</p>
                         </div>
                         <ThemeToggle />
+                    </div>
+                     <div className="flex items-center justify-between p-4 rounded-lg border">
+                        <div>
+                            <Label>Currency</Label>
+                            <p className="text-sm text-muted-foreground">Choose your preferred currency.</p>
+                        </div>
+                        <Select value={state.currency} onValueChange={(value) => handleSetCurrency(value as Currency)}>
+                            <SelectTrigger className="w-[180px]">
+                                <SelectValue placeholder="Select a currency" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                {CURRENCIES.map(c => <SelectItem key={c.code} value={c.code}>{c.symbol} {c.name}</SelectItem>)}
+                            </SelectContent>
+                        </Select>
                     </div>
                      <div className="flex items-center justify-between p-4 rounded-lg border">
                         <div>
@@ -345,7 +366,7 @@ export default function StuSaveApp() {
   );
 }
 
-function TransactionList({ transactions, onDelete }: { transactions: Transaction[], onDelete: (id: string) => void }) {
+function TransactionList({ transactions, onDelete, currencySymbol }: { transactions: Transaction[], onDelete: (id: string) => void, currencySymbol: string }) {
     const [filter, setFilter] = useState('month');
 
     const filteredTransactions = useMemo(() => {
@@ -394,7 +415,7 @@ function TransactionList({ transactions, onDelete }: { transactions: Transaction
                                </div>
                            </div>
                            <div className="flex items-center gap-3">
-                                <p className="font-semibold text-lg">₹{t.amount.toFixed(2)}</p>
+                                <p className="font-semibold text-lg">{currencySymbol}{t.amount.toFixed(2)}</p>
                                 <AlertDialog>
                                     <AlertDialogTrigger asChild>
                                         <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-destructive size-8">
@@ -422,7 +443,7 @@ function TransactionList({ transactions, onDelete }: { transactions: Transaction
     )
 }
 
-function AdvisorView() {
+function AdvisorView({ currencySymbol }: { currencySymbol: string }) {
     const { state } = useStore();
     const [advice, setAdvice] = useState('');
     const [loading, setLoading] = useState(false);
@@ -433,7 +454,7 @@ function AdvisorView() {
         try {
             const spendingSummary = state.transactions
                 .slice(0, 10) // a summary of recent transactions
-                .map(t => `${t.category}: ₹${t.amount}`)
+                .map(t => `${t.category}: ${currencySymbol}${t.amount}`)
                 .join(', ');
             
             if (!spendingSummary) {
