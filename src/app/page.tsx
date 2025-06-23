@@ -212,31 +212,10 @@ export default function StuSaveApp() {
           <TabsContent value="spendings">
              <div className="space-y-6">
                 <Card>
-                    <CardHeader>
-                        <CardTitle>My Finances</CardTitle>
-                        <CardDescription>Set your monthly income and budget to track your progress.</CardDescription>
-                    </CardHeader>
-                    <CardContent>
-                        <form onSubmit={financesForm.handleSubmit(handleSetFinances)} className="grid sm:grid-cols-3 gap-4 items-end">
-                            <div className="space-y-2 sm:col-span-1">
-                                <Label htmlFor="income">Monthly Income ({currencySymbol})</Label>
-                                <Input id="income" type="number" placeholder="e.g. 5000" {...financesForm.register("income")} />
-                                 {financesForm.formState.errors.income && <p className="text-destructive text-sm">{financesForm.formState.errors.income.message}</p>}
-                            </div>
-                            <div className="space-y-2 sm:col-span-1">
-                                <Label htmlFor="budget">Monthly Budget ({currencySymbol})</Label>
-                                <Input id="budget" type="number" placeholder="e.g. 3000" {...financesForm.register("budget")} />
-                                {financesForm.formState.errors.budget && <p className="text-destructive text-sm">{financesForm.formState.errors.budget.message}</p>}
-                            </div>
-                            <Button type="submit" className="w-full sm:w-auto">Save Finances</Button>
-                        </form>
-                    </CardContent>
-                </Card>
-
-                <Card>
                     <Tabs defaultValue="history" className="w-full">
-                      <TabsList className="grid w-full grid-cols-2 rounded-b-none rounded-t-lg">
+                      <TabsList className="grid w-full grid-cols-3 rounded-b-none rounded-t-lg">
                         <TabsTrigger value="history">Spending History</TabsTrigger>
+                        <TabsTrigger value="budget">My Finances</TabsTrigger>
                         <TabsTrigger value="lendborrow">Lend & Borrow</TabsTrigger>
                       </TabsList>
                       <CardContent className="pt-6">
@@ -248,6 +227,27 @@ export default function StuSaveApp() {
                               </div>
                           </div>
                           <SpendingList spendings={state.spendings} onDelete={handleDeleteSpending} currencySymbol={currencySymbol}/>
+                        </TabsContent>
+                         <TabsContent value="budget" className="-mt-2">
+                            <CardHeader className="px-0">
+                                <CardTitle>My Finances</CardTitle>
+                                <CardDescription>Set your monthly income and budget to track your progress.</CardDescription>
+                            </CardHeader>
+                            <CardContent className="px-0">
+                                <form onSubmit={financesForm.handleSubmit(handleSetFinances)} className="grid sm:grid-cols-3 gap-4 items-end">
+                                    <div className="space-y-2 sm:col-span-1">
+                                        <Label htmlFor="income">Monthly Income ({currencySymbol})</Label>
+                                        <Input id="income" type="number" placeholder="e.g. 5000" {...financesForm.register("income")} />
+                                         {financesForm.formState.errors.income && <p className="text-destructive text-sm">{financesForm.formState.errors.income.message}</p>}
+                                    </div>
+                                    <div className="space-y-2 sm:col-span-1">
+                                        <Label htmlFor="budget">Monthly Budget ({currencySymbol})</Label>
+                                        <Input id="budget" type="number" placeholder="e.g. 3000" {...financesForm.register("budget")} />
+                                        {financesForm.formState.errors.budget && <p className="text-destructive text-sm">{financesForm.formState.errors.budget.message}</p>}
+                                    </div>
+                                    <Button type="submit" className="w-full sm:w-auto">Save Finances</Button>
+                                </form>
+                            </CardContent>
                         </TabsContent>
                         <TabsContent value="lendborrow" className="-mt-2">
                           <LendBorrowView currencySymbol={currencySymbol} />
@@ -328,8 +328,8 @@ export default function StuSaveApp() {
                 <TabsTrigger value="dashboard" className="relative flex flex-col items-center justify-center gap-1 p-2 h-auto data-[state=active]:text-primary">
                     <motion.div 
                         className="flex flex-col items-center justify-center gap-1 z-10"
-                        animate={{ y: activeTab === 'dashboard' ? -6 : 0 }}
-                        transition={{ type: "spring", stiffness: 400, damping: 25 }}
+                        animate={{ y: activeTab === 'dashboard' ? -8 : 0, scale: activeTab === 'dashboard' ? 1.2 : 1, rotate: activeTab === 'dashboard' ? -10 : 0 }}
+                        transition={{ type: "spring", stiffness: 300, damping: 10 }}
                     >
                         <LayoutDashboard />
                         <span className="text-xs">Dashboard</span>
@@ -338,8 +338,8 @@ export default function StuSaveApp() {
                 <TabsTrigger value="spendings" className="relative flex flex-col items-center justify-center gap-1 p-2 h-auto data-[state=active]:text-primary">
                     <motion.div 
                         className="flex flex-col items-center justify-center gap-1 z-10"
-                        animate={{ y: activeTab === 'spendings' ? -6 : 0 }}
-                        transition={{ type: "spring", stiffness: 400, damping: 25 }}
+                        animate={{ y: activeTab === 'spendings' ? -8 : 0, scale: activeTab === 'spendings' ? 1.2 : 1, rotate: activeTab === 'spendings' ? -10 : 0 }}
+                        transition={{ type: "spring", stiffness: 300, damping: 10 }}
                     >
                         <Wallet />
                         <span className="text-xs">Spendings</span>
@@ -417,8 +417,8 @@ export default function StuSaveApp() {
                 <TabsTrigger value="advisor" className="relative flex flex-col items-center justify-center gap-1 p-2 h-auto data-[state=active]:text-primary">
                     <motion.div 
                         className="flex flex-col items-center justify-center gap-1 z-10"
-                        animate={{ y: activeTab === 'advisor' ? -6 : 0 }}
-                        transition={{ type: "spring", stiffness: 400, damping: 25 }}
+                        animate={{ y: activeTab === 'advisor' ? -8 : 0, scale: activeTab === 'advisor' ? 1.2 : 1, rotate: activeTab === 'advisor' ? 10 : 0 }}
+                        transition={{ type: "spring", stiffness: 300, damping: 10 }}
                     >
                         <Sparkles />
                         <span className="text-xs">AI Advisor</span>
@@ -427,8 +427,8 @@ export default function StuSaveApp() {
                 <TabsTrigger value="settings" className="relative flex flex-col items-center justify-center gap-1 p-2 h-auto data-[state=active]:text-primary">
                     <motion.div 
                         className="flex flex-col items-center justify-center gap-1 z-10"
-                        animate={{ y: activeTab === 'settings' ? -6 : 0 }}
-                        transition={{ type: "spring", stiffness: 400, damping: 25 }}
+                        animate={{ y: activeTab === 'settings' ? -8 : 0, scale: activeTab === 'settings' ? 1.2 : 1, rotate: activeTab === 'settings' ? 10 : 0 }}
+                        transition={{ type: "spring", stiffness: 300, damping: 10 }}
                     >
                         <Settings />
                         <span className="text-xs">Settings</span>
