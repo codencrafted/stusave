@@ -11,6 +11,7 @@ import { format, startOfMonth, isWithinInterval, startOfWeek } from 'date-fns';
 import { motion, AnimatePresence } from 'framer-motion';
 
 import { getSmartAdvice } from '@/ai/flows/get-smart-advice';
+import { predictNextDaySpending } from '@/ai/flows/predict-spending-flow';
 
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
@@ -223,9 +224,10 @@ export default function StuSaveApp() {
              <div className="space-y-6">
                 <Card>
                     <Tabs defaultValue="history" className="w-full">
-                      <TabsList className="grid w-full grid-cols-3 rounded-b-none rounded-t-lg">
-                        <TabsTrigger value="history">Spending History</TabsTrigger>
-                        <TabsTrigger value="budget">My Finances</TabsTrigger>
+                      <TabsList className="grid w-full grid-cols-4 rounded-b-none rounded-t-lg">
+                        <TabsTrigger value="history">History</TabsTrigger>
+                        <TabsTrigger value="trends">Trends</TabsTrigger>
+                        <TabsTrigger value="finances">Finances</TabsTrigger>
                         <TabsTrigger value="lendborrow">Lend & Borrow</TabsTrigger>
                       </TabsList>
                       <CardContent className="pt-6">
@@ -238,7 +240,21 @@ export default function StuSaveApp() {
                           </div>
                           <SpendingList spendings={state.spendings} onDelete={handleDeleteSpending} currencySymbol={currencySymbol}/>
                         </TabsContent>
-                         <TabsContent value="budget" className="-mt-2">
+                        <TabsContent value="trends" className="-mt-2">
+                            <div className="space-y-6">
+                                <Card>
+                                    <CardHeader>
+                                        <CardTitle>Daily Spending Trend</CardTitle>
+                                        <CardDescription>Your spending over the last 30 days.</CardDescription>
+                                    </CardHeader>
+                                    <CardContent>
+                                        <SpendingLineChart spendings={state.spendings} currencySymbol={currencySymbol} />
+                                    </CardContent>
+                                </Card>
+                                <ForecastView currencySymbol={currencySymbol} />
+                            </div>
+                        </TabsContent>
+                         <TabsContent value="finances" className="-mt-2">
                             <CardHeader className="px-0">
                                 <CardTitle>My Finances</CardTitle>
                                 <CardDescription>Set your monthly income and budget to track your progress.</CardDescription>
@@ -842,9 +858,87 @@ function AdvisorView({ currencySymbol }: { currencySymbol: string }) {
         </Card>
     );
 }
+
+function ForecastView({ currencySymbol }: { currencySymbol: string }) {
+    const { state } = useStore();
+    const [prediction, setPrediction] = useState<{ predictedAmount: number; reasoning: string } | null>(null);
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState<string | null>(null);
+
+    const handleGetPrediction = async () => {
+        setLoading(true);
+        setError(null);
+        setPrediction(null);
+        try {
+            if (state.spendings.length < 1) {
+                setError("Not enough spending data to make a prediction. Please add some expenses first.");
+                setLoading(false);
+                return;
+            }
+
+            const history = state.spendings.map(s => ({
+                date: s.date,
+                amount: s.amount,
+            }));
+
+            const result = await predictNextDaySpending({
+                history,
+                currencySymbol,
+            });
+            setPrediction(result);
+        } catch (e) {
+            console.error("AI Prediction Error:", e);
+            setError("Sorry, I couldn't generate a forecast right now. Please try again later.");
+        }
+        setLoading(false);
+    };
+
+    return (
+        <Card>
+            <CardHeader>
+                <CardTitle>AI Spending Forecast</CardTitle>
+                <CardDescription>Predict your spending for tomorrow based on your recent history.</CardDescription>
+            </CardHeader>
+            <CardContent className="text-center min-h-[150px] flex flex-col justify-center items-center">
+                {loading && (
+                    <div className="space-y-2">
+                        <p className="text-muted-foreground">Forecasting your future spending...</p>
+                        <Skeleton className="h-10 w-32 mx-auto" />
+                        <Skeleton className="h-4 w-64 mx-auto" />
+                    </div>
+                )}
+                {!loading && error && (
+                    <p className="text-destructive">{error}</p>
+                )}
+                {!loading && !error && prediction && (
+                     <motion.div
+                        initial={{ opacity: 0, scale: 0.9 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        className="text-center"
+                     >
+                        <p className="text-4xl font-bold">{currencySymbol}{prediction.predictedAmount.toFixed(2)}</p>
+                        <p className="text-sm text-muted-foreground mt-2 max-w-xs mx-auto">{prediction.reasoning}</p>
+                    </motion.div>
+                )}
+                {!loading && !error && !prediction && (
+                     <div className="text-center space-y-2">
+                        <Wallet className="mx-auto h-8 w-8 text-muted-foreground" />
+                        <p className="text-sm text-muted-foreground">Click the button to get your next day's spending forecast.</p>
+                    </div>
+                )}
+            </CardContent>
+            <CardFooter className="justify-center">
+                <Button onClick={handleGetPrediction} disabled={loading}>
+                    {loading ? "Calculating..." : <><Sparkles className="mr-2 h-4 w-4" /> Predict Tomorrow's Spending</>}
+                </Button>
+            </CardFooter>
+        </Card>
+    );
+}
     
 
     
+
 
 
 
