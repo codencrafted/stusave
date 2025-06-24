@@ -199,7 +199,7 @@ export default function StuSaveApp() {
               </Card>
               <Card className="md:col-span-2">
                 <CardHeader>
-                  <CardTitle>Lend & Borrow Summary</CardTitle>
+                  <CardTitle>Lend/Borrow Summary</CardTitle>
                   <CardDescription>Your current pending balances with friends.</CardDescription>
                 </CardHeader>
                 <CardContent className="grid grid-cols-1 md:grid-cols-3 gap-4 text-center">
@@ -228,7 +228,7 @@ export default function StuSaveApp() {
                         <TabsTrigger value="history">History</TabsTrigger>
                         <TabsTrigger value="trends">Trends</TabsTrigger>
                         <TabsTrigger value="finances">Finances</TabsTrigger>
-                        <TabsTrigger value="lendborrow">Lend & Borrow</TabsTrigger>
+                        <TabsTrigger value="lendborrow">Lend/Borrow</TabsTrigger>
                       </TabsList>
                       <CardContent className="pt-6">
                         <TabsContent value="history">
@@ -372,7 +372,7 @@ export default function StuSaveApp() {
                                       </DialogDescription>
                                     </DialogHeader>
                                     <form onSubmit={spendingForm.handleSubmit(handleAddSpending)} className="space-y-4 pt-2">
-                                       <div className="grid grid-cols-2 gap-4">
+                                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                          <div className="space-y-2">
                                           <Label htmlFor="amount">Amount ({currencySymbol})</Label>
                                           <Input id="amount" type="number" placeholder="0.00" {...spendingForm.register("amount")} />
@@ -592,7 +592,7 @@ function LendBorrowView({ currencySymbol }: { currencySymbol: string }) {
         <div>
             <div className="flex flex-row items-center justify-between mb-4">
                 <div>
-                    <h3 className="text-lg font-semibold">Lend & Borrow Tracker</h3>
+                    <h3 className="text-lg font-semibold">Lend/Borrow Tracker</h3>
                     <p className="text-sm text-muted-foreground">Manage money shared with your friends.</p>
                 </div>
                 <Dialog open={isAddLendBorrowOpen} onOpenChange={setAddLendBorrowOpen}>
@@ -641,7 +641,7 @@ function LendBorrowView({ currencySymbol }: { currencySymbol: string }) {
                                 <Input id="purpose" placeholder="e.g. Coffee" {...form.register("purpose")} />
                                 {form.formState.errors.purpose && <p className="text-destructive text-sm">{form.formState.errors.purpose.message}</p>}
                             </div>
-                            <div className="grid grid-cols-2 gap-4">
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                 <div className="space-y-2">
                                     <Label htmlFor="amount">Amount ({currencySymbol})</Label>
                                     <Input id="amount" type="number" placeholder="0.00" {...form.register("amount")} />
@@ -965,3 +965,6 @@ function ForecastView({ currencySymbol }: { currencySymbol: string }) {
 
 
 
+
+
+    
