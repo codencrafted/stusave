@@ -6,13 +6,11 @@ import { useStore } from '@/hooks/use-store';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { LayoutDashboard, PlusCircle, Settings, Sparkles, PiggyBank, Trash2, HandCoins, Users, CheckCircle2, XCircle, Bell, Lightbulb, ArrowUpRight, ArrowDownLeft, Wallet, BrainCircuit } from 'lucide-react';
+import { LayoutDashboard, PlusCircle, Settings, Sparkles, PiggyBank, Trash2, HandCoins, Users, CheckCircle2, XCircle, Bell, Lightbulb, ArrowUpRight, ArrowDownLeft, Wallet } from 'lucide-react';
 import { format, startOfMonth, isWithinInterval, startOfWeek } from 'date-fns';
 import { motion, AnimatePresence } from 'framer-motion';
 
 import { getSmartAdvice } from '@/ai/flows/get-smart-advice';
-import { predictNextDaySpending } from '@/ai/flows/predict-spending-flow';
-import type { SpendingPredictionOutput } from '@/ai/flows/predict-spending-flow';
 
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
@@ -251,7 +249,6 @@ export default function StuSaveApp() {
                                     <SpendingLineChart spendings={state.spendings} currencySymbol={currencySymbol} />
                                 </CardContent>
                             </Card>
-                            <ForecastView spendings={state.spendings} currencySymbol={currencySymbol} />
                           </div>
                         </TabsContent>
                          <TabsContent value="budget" className="-mt-2">
@@ -860,87 +857,10 @@ function AdvisorView({ currencySymbol }: { currencySymbol: string }) {
         </Card>
     );
 }
-
-function ForecastView({ spendings, currencySymbol }: { spendings: Spending[], currencySymbol: string }) {
-    const [prediction, setPrediction] = useState<SpendingPredictionOutput | null>(null);
-    const [loading, setLoading] = useState(false);
-    const [error, setError] = useState('');
-
-    const handleGetPrediction = async () => {
-        setLoading(true);
-        setError('');
-        setPrediction(null);
-        try {
-            if (spendings.length < 2) {
-                setError("Not enough spending data to make a prediction. Please add more entries.");
-                setLoading(false);
-                return;
-            }
-
-            const history = spendings.map(s => ({ date: s.date, amount: s.amount }));
-            const result = await predictNextDaySpending({
-                history,
-                currencySymbol,
-            });
-            setPrediction(result);
-        } catch (err) {
-            console.error("AI Prediction Error:", err);
-            setError("Sorry, I couldn't get a prediction right now. Please try again later.");
-        }
-        setLoading(false);
-    };
-
-    return (
-        <Card>
-            <CardHeader>
-                <div className="flex items-start justify-between">
-                    <div>
-                        <CardTitle>AI Spending Forecast</CardTitle>
-                        <CardDescription>Predict your spending for tomorrow.</CardDescription>
-                    </div>
-                    <BrainCircuit className="h-8 w-8 text-primary" />
-                </div>
-            </CardHeader>
-            <CardContent className="text-center">
-                {loading && (
-                    <div className="space-y-3 py-6">
-                        <Skeleton className="h-10 w-48 mx-auto" />
-                        <Skeleton className="h-6 w-full max-w-sm mx-auto" />
-                    </div>
-                )}
-                
-                {error && !loading && (
-                     <p className="text-destructive text-sm py-6">{error}</p>
-                )}
-                
-                {!loading && !error && prediction && (
-                    <motion.div
-                        initial={{ opacity: 0, y: 10 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        className="space-y-3 py-6"
-                    >
-                       <p className="text-4xl font-bold text-primary">{currencySymbol}{prediction.predictedAmount.toFixed(2)}</p>
-                       <p className="text-muted-foreground max-w-sm mx-auto">{prediction.reasoning}</p>
-                    </motion.div>
-                )}
-
-                {!loading && !error && !prediction && (
-                    <div className="py-6">
-                        <p className="text-muted-foreground">Click the button to get your AI-powered forecast.</p>
-                    </div>
-                )}
-            </CardContent>
-            <CardFooter className="flex-col">
-                 <Button onClick={handleGetPrediction} disabled={loading} className="w-full">
-                    {loading ? "Forecasting..." : "🔮 Predict Tomorrow's Spending"}
-                </Button>
-            </CardFooter>
-        </Card>
-    );
-}
     
 
     
+
 
 
 
