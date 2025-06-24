@@ -244,7 +244,7 @@ export default function StuSaveApp() {
                             <div className="space-y-6">
                                 <Card>
                                     <CardHeader>
-                                        <CardTitle>Daily Spending Trend</CardTitle>
+                                        <CardTitle className="text-xl sm:text-2xl">Daily Spending Trend</CardTitle>
                                         <CardDescription>Your spending over the last 30 days.</CardDescription>
                                     </CardHeader>
                                     <CardContent>
@@ -905,7 +905,7 @@ function ForecastView({ currencySymbol }: { currencySymbol: string }) {
                    <Lightbulb size={20} />
                 </div>
                 <div>
-                    <CardTitle>AI Spending Forecast</CardTitle>
+                    <CardTitle className="text-xl sm:text-2xl">AI Spending Forecast</CardTitle>
                     <CardDescription>Predict your spending for tomorrow using AI.</CardDescription>
                 </div>
             </CardHeader>
@@ -930,7 +930,7 @@ function ForecastView({ currencySymbol }: { currencySymbol: string }) {
                         className="w-full bg-accent/50 p-6 rounded-lg border"
                      >
                         <p className="text-sm text-muted-foreground">Forecast for tomorrow:</p>
-                        <p className="text-4xl font-bold text-primary">{currencySymbol}{prediction.predictedAmount.toFixed(2)}</p>
+                        <p className="text-3xl sm:text-4xl font-bold text-primary">{currencySymbol}{prediction.predictedAmount.toFixed(2)}</p>
                         <p className="text-sm text-muted-foreground mt-2 max-w-xs mx-auto italic">"{prediction.reasoning}"</p>
                     </motion.div>
                 )}
@@ -943,7 +943,7 @@ function ForecastView({ currencySymbol }: { currencySymbol: string }) {
                 )}
             </CardContent>
             <CardFooter className="justify-center border-t pt-6">
-                <Button onClick={handleGetPrediction} disabled={loading} size="lg">
+                <Button onClick={handleGetPrediction} disabled={loading}>
                     {loading ? "Calculating..." : <><Sparkles className="mr-2 h-4 w-4" /> Predict Tomorrow's Spending</>}
                 </Button>
             </CardFooter>

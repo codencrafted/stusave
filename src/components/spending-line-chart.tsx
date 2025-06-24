@@ -1,3 +1,4 @@
+
 "use client"
 
 import * as React from "react"
@@ -60,7 +61,7 @@ export function SpendingLineChart({ spendings, currencySymbol }: SpendingLineCha
           data={chartData}
           margin={{
             top: 5,
-            right: 20,
+            right: 10,
             left: 10,
             bottom: 5,
           }}
@@ -73,6 +74,7 @@ export function SpendingLineChart({ spendings, currencySymbol }: SpendingLineCha
             tickMargin={8}
             tickFormatter={(value) => value}
             className="text-xs"
+            interval={6}
           />
            <YAxis
             stroke="#888888"
