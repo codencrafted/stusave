@@ -144,8 +144,6 @@ export default function StuSaveApp() {
     { name: 'settings', icon: Settings, label: 'Settings' },
   ], []);
 
-  const activeIndex = useMemo(() => navTabs.findIndex(t => t.name === activeTab), [activeTab, navTabs]);
-
   return (
     <div className="bg-background text-foreground font-body">
       <Tabs value={activeTab} onValueChange={setActiveTab} className="relative min-h-screen w-full">
@@ -239,17 +237,6 @@ export default function StuSaveApp() {
                               </div>
                           </div>
                           <SpendingList spendings={state.spendings} onDelete={handleDeleteSpending} currencySymbol={currencySymbol}/>
-                          <div className="mt-8 grid gap-6">
-                            <Card>
-                                <CardHeader>
-                                    <CardTitle>Spending Trend</CardTitle>
-                                    <CardDescription>Your spending over the last 30 days.</CardDescription>
-                                </CardHeader>
-                                <CardContent>
-                                    <SpendingLineChart spendings={state.spendings} currencySymbol={currencySymbol} />
-                                </CardContent>
-                            </Card>
-                          </div>
                         </TabsContent>
                          <TabsContent value="budget" className="-mt-2">
                             <CardHeader className="px-0">
@@ -348,17 +335,9 @@ export default function StuSaveApp() {
         
         <footer className="fixed bottom-0 left-0 right-0 z-50 w-full max-w-4xl mx-auto h-20 bg-background border-t">
             <TabsList className="relative grid h-full w-full grid-cols-5 text-muted-foreground bg-transparent rounded-none">
-                {activeIndex !== -1 && (
-                     <motion.div
-                        layoutId="active-tab-indicator"
-                        className="absolute top-1/2 left-0 h-10 w-[calc(100%/5)] -translate-y-1/2 rounded-full bg-primary/10"
-                        initial={{ x: `${activeIndex * 100}%` }}
-                        animate={{ x: `${activeIndex * 100}%` }}
-                        transition={{ type: 'spring', stiffness: 350, damping: 30 }}
-                    />
-                )}
                 {navTabs.map((tab) => {
                     const Icon = tab.icon;
+                    const isActive = activeTab === tab.name;
 
                     if (tab.name === 'add') {
                         return (
@@ -434,8 +413,14 @@ export default function StuSaveApp() {
 
                     return (
                         <TabsTrigger key={tab.name} value={tab.name!} className="relative z-10 flex flex-col items-center justify-center gap-1 p-2 h-full data-[state=active]:text-primary rounded-none">
-                            <Icon />
-                            <span className="text-xs">{tab.label}</span>
+                            <motion.div
+                                animate={{ scale: isActive ? 1.15 : 1, y: isActive ? -4 : 0 }}
+                                transition={{ type: "spring", stiffness: 400, damping: 15 }}
+                                className="flex flex-col items-center gap-1"
+                            >
+                                <Icon />
+                                <span className="text-xs">{tab.label}</span>
+                            </motion.div>
                         </TabsTrigger>
                     );
                 })}
@@ -860,6 +845,7 @@ function AdvisorView({ currencySymbol }: { currencySymbol: string }) {
     
 
     
+
 
 
 
