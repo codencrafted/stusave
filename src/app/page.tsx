@@ -346,7 +346,6 @@ export default function StuSaveApp() {
                     />
                 )}
                 {navTabs.map((tab) => {
-                    const isActive = activeTab === tab.name;
                     const Icon = tab.icon;
 
                     if (tab.name === 'add') {
@@ -422,15 +421,9 @@ export default function StuSaveApp() {
                     }
 
                     return (
-                        <TabsTrigger key={tab.name} value={tab.name!} className="relative flex flex-col items-center justify-center gap-1 p-2 h-full data-[state=active]:text-primary rounded-none">
-                            <motion.div
-                                animate={{ y: isActive ? -4 : 0 }}
-                                transition={{ type: 'spring', stiffness: 300, damping: 20 }}
-                                className="flex flex-col items-center justify-center gap-1"
-                            >
-                                <Icon className={`transition-transform ${isActive ? 'scale-110' : 'scale-100'}`} />
-                                <span className="text-xs">{tab.label}</span>
-                            </motion.div>
+                        <TabsTrigger key={tab.name} value={tab.name!} className="relative z-10 flex flex-col items-center justify-center gap-1 p-2 h-full data-[state=active]:text-primary rounded-none">
+                            <Icon />
+                            <span className="text-xs">{tab.label}</span>
                         </TabsTrigger>
                     );
                 })}
@@ -856,6 +849,7 @@ function AdvisorView({ currencySymbol }: { currencySymbol: string }) {
     
 
     
+
 
 
 
