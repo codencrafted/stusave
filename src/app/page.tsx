@@ -334,7 +334,7 @@ export default function StuSaveApp() {
           </TabsContent>
         </main>
         
-        <footer className="fixed bottom-0 left-0 right-0 z-50 w-full max-w-4xl mx-auto h-20 bg-background/80 backdrop-blur-sm border-t">
+        <footer className="fixed bottom-0 left-0 right-0 z-50 w-full max-w-4xl mx-auto h-20 bg-background border-t">
             <TabsList className="relative grid h-full w-full grid-cols-5 text-muted-foreground bg-transparent rounded-none">
                 {activeIndex !== -1 && (
                      <motion.div
@@ -856,6 +856,7 @@ function AdvisorView({ currencySymbol }: { currencySymbol: string }) {
     
 
     
+
 
 
 
