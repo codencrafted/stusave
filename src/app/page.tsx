@@ -7,7 +7,7 @@ import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { LayoutDashboard, PlusCircle, Settings, Sparkles, PiggyBank, Trash2, HandCoins, Users, CheckCircle2, XCircle, Bell, Lightbulb, ArrowUpRight, ArrowDownLeft, Wallet } from 'lucide-react';
-import { format, startOfMonth, isWithinInterval, startOfWeek } from 'date-fns';
+import { format, startOfMonth, isWithinInterval, startOfWeek, addDays } from 'date-fns';
 import { motion, AnimatePresence } from 'framer-motion';
 
 import { getSmartAdvice } from '@/ai/flows/get-smart-advice';
@@ -870,8 +870,8 @@ function ForecastView({ currencySymbol }: { currencySymbol: string }) {
         setError(null);
         setPrediction(null);
         try {
-            if (state.spendings.length < 1) {
-                setError("Not enough spending data to make a prediction. Please add some expenses first.");
+            if (state.spendings.length < 3) {
+                setError("Not enough spending data. Add at least 3 expenses for a more accurate forecast.");
                 setLoading(false);
                 return;
             }
@@ -879,11 +879,16 @@ function ForecastView({ currencySymbol }: { currencySymbol: string }) {
             const history = state.spendings.map(s => ({
                 date: s.date,
                 amount: s.amount,
+                dayOfWeek: format(new Date(s.date), 'EEEE'),
             }));
+            
+            const tomorrow = addDays(new Date(), 1);
+            const tomorrowDayOfWeek = format(tomorrow, 'EEEE');
 
             const result = await predictNextDaySpending({
                 history,
                 currencySymbol,
+                tomorrowDayOfWeek,
             });
             setPrediction(result);
         } catch (e) {
@@ -895,40 +900,50 @@ function ForecastView({ currencySymbol }: { currencySymbol: string }) {
 
     return (
         <Card>
-            <CardHeader>
-                <CardTitle>AI Spending Forecast</CardTitle>
-                <CardDescription>Predict your spending for tomorrow based on your recent history.</CardDescription>
+            <CardHeader className="flex flex-row items-center gap-4">
+                 <div className="bg-primary/10 text-primary p-3 rounded-full">
+                   <Lightbulb size={20} />
+                </div>
+                <div>
+                    <CardTitle>AI Spending Forecast</CardTitle>
+                    <CardDescription>Predict your spending for tomorrow using AI.</CardDescription>
+                </div>
             </CardHeader>
-            <CardContent className="text-center min-h-[150px] flex flex-col justify-center items-center">
+            <CardContent className="text-center min-h-[180px] flex flex-col justify-center items-center p-6">
                 {loading && (
-                    <div className="space-y-2">
-                        <p className="text-muted-foreground">Forecasting your future spending...</p>
-                        <Skeleton className="h-10 w-32 mx-auto" />
+                    <div className="space-y-3">
+                        <p className="text-muted-foreground animate-pulse">Analyzing your spending habits...</p>
+                        <Skeleton className="h-12 w-40 mx-auto" />
                         <Skeleton className="h-4 w-64 mx-auto" />
                     </div>
                 )}
                 {!loading && error && (
-                    <p className="text-destructive">{error}</p>
+                    <div className="text-destructive-foreground bg-destructive/90 p-4 rounded-md w-full">
+                        <p className="font-semibold">Oops!</p>
+                        <p className="text-sm">{error}</p>
+                    </div>
                 )}
                 {!loading && !error && prediction && (
                      <motion.div
-                        initial={{ opacity: 0, scale: 0.9 }}
+                        initial={{ opacity: 0, scale: 0.95 }}
                         animate={{ opacity: 1, scale: 1 }}
-                        className="text-center"
+                        className="w-full bg-accent/50 p-6 rounded-lg border"
                      >
-                        <p className="text-4xl font-bold">{currencySymbol}{prediction.predictedAmount.toFixed(2)}</p>
-                        <p className="text-sm text-muted-foreground mt-2 max-w-xs mx-auto">{prediction.reasoning}</p>
+                        <p className="text-sm text-muted-foreground">Forecast for tomorrow:</p>
+                        <p className="text-4xl font-bold text-primary">{currencySymbol}{prediction.predictedAmount.toFixed(2)}</p>
+                        <p className="text-sm text-muted-foreground mt-2 max-w-xs mx-auto italic">"{prediction.reasoning}"</p>
                     </motion.div>
                 )}
                 {!loading && !error && !prediction && (
-                     <div className="text-center space-y-2">
-                        <Wallet className="mx-auto h-8 w-8 text-muted-foreground" />
-                        <p className="text-sm text-muted-foreground">Click the button to get your next day's spending forecast.</p>
+                     <div className="text-center space-y-3">
+                        <Wallet className="mx-auto h-10 w-10 text-muted-foreground" />
+                        <h3 className="text-lg font-medium">Ready for a forecast?</h3>
+                        <p className="text-sm text-muted-foreground max-w-xs mx-auto">Get a prediction for tomorrow's spending based on your recent history.</p>
                     </div>
                 )}
             </CardContent>
-            <CardFooter className="justify-center">
-                <Button onClick={handleGetPrediction} disabled={loading}>
+            <CardFooter className="justify-center border-t pt-6">
+                <Button onClick={handleGetPrediction} disabled={loading} size="lg">
                     {loading ? "Calculating..." : <><Sparkles className="mr-2 h-4 w-4" /> Predict Tomorrow's Spending</>}
                 </Button>
             </CardFooter>
@@ -938,6 +953,7 @@ function ForecastView({ currencySymbol }: { currencySymbol: string }) {
     
 
     
+
 
 
 
