@@ -56,22 +56,6 @@ export default function StuSaveApp() {
   const { toast } = useToast();
   const [isAddSpendingOpen, setAddSpendingOpen] = useState(false);
   const [activeTab, setActiveTab] = useState('dashboard');
-  
-  const navRef = useRef<HTMLElement>(null);
-  const [navWidth, setNavWidth] = useState(0);
-
-  useEffect(() => {
-    const navElement = navRef.current;
-    if (!navElement) return;
-
-    const observer = new ResizeObserver(() => {
-      setNavWidth(navElement.offsetWidth);
-    });
-
-    observer.observe(navElement);
-    return () => observer.disconnect();
-  }, []);
-
 
   const currencySymbol = useMemo(() => findCurrencySymbol(state.currency), [state.currency]);
 
@@ -160,22 +144,6 @@ export default function StuSaveApp() {
   ], []);
 
   const activeIndex = useMemo(() => navTabs.findIndex(t => t.name === activeTab), [activeTab, navTabs]);
-
-  const pathD = useMemo(() => {
-    if (navWidth === 0 || activeIndex === -1) {
-      return `M 0 20 L ${navWidth} 20 L ${navWidth} 80 L 0 80 Z`;
-    }
-    const tabWidth = navWidth / navTabs.length;
-    const curveWidth = 80;
-    const curveDepth = 35; // Height of the curve
-    const curveStart = (activeIndex * tabWidth) + (tabWidth - curveWidth) / 2;
-    const curveEnd = curveStart + curveWidth;
-    const curveCenter = curveStart + curveWidth / 2;
-    const topY = 20; // Y-position of the nav bar's top line
-
-    return `M 0 ${topY} L ${curveStart} ${topY} C ${curveStart + 20} ${topY}, ${curveCenter - 30} ${topY - curveDepth}, ${curveCenter} ${topY - curveDepth} S ${curveEnd - 20} ${topY}, ${curveEnd} ${topY} L ${navWidth} ${topY} L ${navWidth} 80 L 0 80 Z`;
-  }, [navWidth, activeIndex, navTabs.length]);
-
 
   return (
     <div className="bg-background text-foreground font-body">
@@ -366,33 +334,24 @@ export default function StuSaveApp() {
           </TabsContent>
         </main>
         
-        <footer ref={navRef} className="fixed bottom-0 left-0 right-0 z-50 h-20 w-full max-w-4xl mx-auto">
-            <motion.svg
-                width={navWidth}
-                height="80"
-                viewBox={`0 0 ${navWidth} 80`}
-                className="absolute top-0 left-0"
-                style={{
-                  backdropFilter: 'blur(8px)',
-                  WebkitBackdropFilter: 'blur(8px)',
-                }}
-              >
-                <motion.path
-                  d={pathD}
-                  fill="hsl(var(--background) / 0.8)"
-                  stroke="hsl(var(--border) / 0.5)"
-                  strokeWidth="1"
-                  transition={{ type: 'spring', stiffness: 350, damping: 30 }}
-                />
-            </motion.svg>
+        <footer className="fixed bottom-0 left-0 right-0 z-50 w-full max-w-4xl mx-auto h-20 bg-background/80 backdrop-blur-sm border-t">
             <TabsList className="relative grid h-full w-full grid-cols-5 text-muted-foreground bg-transparent rounded-none">
+                {activeIndex !== -1 && (
+                     <motion.div
+                        layoutId="active-tab-indicator"
+                        className="absolute top-1/2 left-0 h-10 w-[calc(100%/5)] -translate-y-1/2 rounded-full bg-primary/10"
+                        initial={{ x: `${activeIndex * 100}%` }}
+                        animate={{ x: `${activeIndex * 100}%` }}
+                        transition={{ type: 'spring', stiffness: 350, damping: 30 }}
+                    />
+                )}
                 {navTabs.map((tab) => {
                     const isActive = activeTab === tab.name;
                     const Icon = tab.icon;
 
                     if (tab.name === 'add') {
                         return (
-                            <div key={tab.name} className="flex items-center justify-center">
+                            <div key={tab.name} className="flex items-center justify-center z-10">
                                <Dialog open={isAddSpendingOpen} onOpenChange={setAddSpendingOpen}>
                                   <DialogTrigger asChild>
                                      <Button size="icon" className="rounded-full h-14 w-14 shadow-lg -translate-y-4 bg-primary hover:bg-primary/90">
@@ -463,9 +422,9 @@ export default function StuSaveApp() {
                     }
 
                     return (
-                        <TabsTrigger key={tab.name} value={tab.name!} className="flex flex-col items-center justify-center gap-1 p-2 h-full data-[state=active]:text-primary">
+                        <TabsTrigger key={tab.name} value={tab.name!} className="relative flex flex-col items-center justify-center gap-1 p-2 h-full data-[state=active]:text-primary rounded-none">
                             <motion.div
-                                animate={{ y: isActive ? -28 : 0 }}
+                                animate={{ y: isActive ? -4 : 0 }}
                                 transition={{ type: 'spring', stiffness: 300, damping: 20 }}
                                 className="flex flex-col items-center justify-center gap-1"
                             >
@@ -897,6 +856,7 @@ function AdvisorView({ currencySymbol }: { currencySymbol: string }) {
     
 
     
+
 
 
 
