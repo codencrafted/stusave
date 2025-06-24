@@ -909,44 +909,53 @@ function ForecastView({ currencySymbol }: { currencySymbol: string }) {
                     <CardDescription>Predict your spending for tomorrow using AI.</CardDescription>
                 </div>
             </CardHeader>
-            <CardContent className="text-center min-h-[180px] flex flex-col justify-center items-center p-6">
-                {loading && (
-                    <div className="space-y-3">
-                        <p className="text-muted-foreground animate-pulse">Analyzing your spending habits...</p>
-                        <Skeleton className="h-12 w-40 mx-auto" />
-                        <Skeleton className="h-4 w-64 mx-auto" />
-                    </div>
-                )}
-                {!loading && error && (
-                    <div className="text-destructive-foreground bg-destructive/90 p-4 rounded-md w-full">
-                        <p className="font-semibold">Oops!</p>
-                        <p className="text-sm">{error}</p>
-                    </div>
-                )}
-                {!loading && !error && prediction && (
-                     <motion.div
-                        initial={{ opacity: 0, scale: 0.95 }}
-                        animate={{ opacity: 1, scale: 1 }}
-                        className="w-full bg-accent/50 p-6 rounded-lg border"
-                     >
-                        <p className="text-sm text-muted-foreground">Forecast for tomorrow:</p>
-                        <p className="text-3xl sm:text-4xl font-bold text-primary">{currencySymbol}{prediction.predictedAmount.toFixed(2)}</p>
-                        <p className="text-sm text-muted-foreground mt-2 max-w-xs mx-auto italic">"{prediction.reasoning}"</p>
-                    </motion.div>
-                )}
-                {!loading && !error && !prediction && (
-                     <div className="text-center space-y-3">
-                        <Wallet className="mx-auto h-10 w-10 text-muted-foreground" />
-                        <h3 className="text-lg font-medium">Ready for a forecast?</h3>
-                        <p className="text-sm text-muted-foreground max-w-xs mx-auto">Get a prediction for tomorrow's spending based on your recent history.</p>
-                    </div>
-                )}
+            <CardContent className="p-6">
+                <div className="text-center flex flex-col justify-center items-center min-h-[240px] gap-4">
+                    {loading ? (
+                        <>
+                            <p className="text-muted-foreground animate-pulse">Analyzing your spending habits...</p>
+                            <Skeleton className="h-12 w-40 mx-auto" />
+                            <Skeleton className="h-4 w-64 mx-auto" />
+                        </>
+                    ) : error ? (
+                        <>
+                            <div className="text-destructive-foreground bg-destructive/90 p-4 rounded-md w-full">
+                                <p className="font-semibold">Oops!</p>
+                                <p className="text-sm">{error}</p>
+                            </div>
+                            <Button onClick={handleGetPrediction} disabled={loading} variant="secondary">
+                                <Sparkles className="mr-2 h-4 w-4" /> Try Again
+                            </Button>
+                        </>
+                    ) : prediction ? (
+                        <>
+                            <motion.div
+                                initial={{ opacity: 0, scale: 0.95 }}
+                                animate={{ opacity: 1, scale: 1 }}
+                                className="w-full bg-accent/50 p-6 rounded-lg border"
+                            >
+                                <p className="text-sm text-muted-foreground">Forecast for tomorrow:</p>
+                                <p className="text-3xl sm:text-4xl font-bold text-primary">{currencySymbol}{prediction.predictedAmount.toFixed(2)}</p>
+                                <p className="text-sm text-muted-foreground mt-2 max-w-xs mx-auto italic">"{prediction.reasoning}"</p>
+                            </motion.div>
+                             <Button onClick={handleGetPrediction} disabled={loading} variant="secondary">
+                                <Sparkles className="mr-2 h-4 w-4" /> Re-predict
+                            </Button>
+                        </>
+                    ) : (
+                        <>
+                            <Wallet className="mx-auto h-10 w-10 text-muted-foreground" />
+                            <div className="space-y-1">
+                                <h3 className="text-lg font-medium">Ready for a forecast?</h3>
+                                <p className="text-sm text-muted-foreground max-w-xs mx-auto">Get a prediction for tomorrow's spending based on your recent history.</p>
+                            </div>
+                            <Button onClick={handleGetPrediction} disabled={loading}>
+                                <Sparkles className="mr-2 h-4 w-4" /> Predict Tomorrow's Spending
+                            </Button>
+                        </>
+                    )}
+                </div>
             </CardContent>
-            <CardFooter className="justify-center border-t pt-6">
-                <Button onClick={handleGetPrediction} disabled={loading}>
-                    {loading ? "Calculating..." : <><Sparkles className="mr-2 h-4 w-4" /> Predict Tomorrow's Spending</>}
-                </Button>
-            </CardFooter>
         </Card>
     );
 }
@@ -965,6 +974,9 @@ function ForecastView({ currencySymbol }: { currencySymbol: string }) {
 
 
 
+
+
+    
 
 
     
