@@ -1,6 +1,8 @@
 "use client"
 
 import React, { createContext, useContext, useReducer, useEffect, type ReactNode } from 'react';
+import { motion } from 'framer-motion';
+import { StuSaveLogo } from '@/components/logo';
 import type { Spending, Currency, CreditDebitRecord, LendBorrowStatus } from '@/lib/types';
 
 interface StoreState {
@@ -93,7 +95,8 @@ export const StoreProvider = ({ children }: { children: ReactNode }) => {
     } catch (error) {
       console.error("Could not load state from localStorage", error);
     }
-    setIsHydrated(true);
+    // Add a small delay to make the loading screen visible
+    setTimeout(() => setIsHydrated(true), 500);
   }, []);
 
   useEffect(() => {
@@ -107,7 +110,24 @@ export const StoreProvider = ({ children }: { children: ReactNode }) => {
   }, [state, isHydrated]);
 
   if (!isHydrated) {
-    return <div className="flex min-h-screen w-full items-center justify-center bg-background"><p>Loading StuSave...</p></div>;
+    return (
+        <div className="flex min-h-screen w-full flex-col items-center justify-center bg-background gap-4">
+            <motion.div
+                animate={{
+                    scale: [1, 1.05, 1],
+                    opacity: [0.8, 1, 0.8],
+                }}
+                transition={{
+                    duration: 2,
+                    repeat: Infinity,
+                    repeatType: "loop",
+                }}
+            >
+                <StuSaveLogo size={96} />
+            </motion.div>
+            <p className="text-lg text-muted-foreground animate-pulse">Loading your dashboard...</p>
+        </div>
+    );
   }
 
   return (
