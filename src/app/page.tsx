@@ -323,7 +323,6 @@ function StuSaveApp() {
                                         <SpendingLineChart spendings={state.spendings} currencySymbol={currencySymbol} />
                                     </CardContent>
                                 </Card>
-                                <ForecastView currencySymbol={currencySymbol} />
                             </div>
                         </TabsContent>
                          <TabsContent value="finances" className="-mt-2">
@@ -357,7 +356,10 @@ function StuSaveApp() {
           </TabsContent>
 
           <TabsContent value="advisor">
-            <AdvisorView currencySymbol={currencySymbol} />
+            <div className="space-y-8">
+              <AdvisorView currencySymbol={currencySymbol} />
+              <ForecastView currencySymbol={currencySymbol} />
+            </div>
           </TabsContent>
 
           <TabsContent value="settings">
@@ -872,62 +874,52 @@ function AdvisorView({ currencySymbol }: { currencySymbol: string }) {
     };
 
     return (
-        <div className="flex flex-col items-center justify-start text-center py-8 px-4">
-            <div className="w-full max-w-lg mb-10 text-center">
-                 <div className="inline-block bg-primary/10 text-primary p-4 rounded-full mb-4">
-                    <Sparkles size={32} />
+        <Card>
+            <CardHeader className="flex flex-row items-center gap-4">
+                 <div className="bg-primary/10 text-primary p-3 rounded-full">
+                    <Sparkles size={20} />
                 </div>
-                <h1 className="text-3xl md:text-4xl font-bold font-headline mb-2">Your Personal AI Advisor</h1>
-                <p className="text-lg text-muted-foreground">
-                    Get smart, actionable money-saving tips based on your spending.
-                </p>
-            </div>
-
-            <div className="w-full max-w-xl min-h-[150px] flex flex-col items-center justify-center mb-10">
-                {loading && (
-                    <div className="space-y-4 animate-in fade-in-0 w-full text-center">
-                       <p className="text-muted-foreground animate-pulse">Analyzing your habits...</p>
-                       <Skeleton className="h-8 w-11/12 mx-auto" />
-                       <Skeleton className="h-8 w-3/4 mx-auto" />
-                    </div>
-                )}
-
-                {!loading && advice && (
-                    <motion.div 
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 0.5, ease: "easeOut" }}
-                        className="bg-accent/50 border-l-4 border-primary p-6 rounded-lg text-left w-full shadow-lg"
-                    >
-                        <p className="text-xl font-medium text-foreground/90">
-                            <Lightbulb className="inline-block mr-3 -mt-1 h-6 w-6 text-primary" />
-                            {advice}
-                        </p>
-                    </motion.div>
-                )}
-
-                {!loading && !advice && (
-                    <motion.div 
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        className="text-center space-y-3 animate-in fade-in-0"
-                    >
-                        <p className="text-muted-foreground max-w-sm mx-auto">
-                            Ready for some advice? Click the button below to let our AI analyze your spending and give you a personalized tip.
-                        </p>
-                    </motion.div>
-                )}
-            </div>
-
-            <div className="w-full max-w-sm">
-                <Button onClick={handleGetAdvice} disabled={loading} size="lg" className="w-full h-14 text-lg shadow-lg hover:shadow-primary/40 transition-shadow">
-                    {loading ? "Thinking..." : "💡 Get Smart Tip"}
-                </Button>
-                <p className="text-xs text-muted-foreground mt-4 text-center">
-                    Powered by Gemini AI. Advice is generated and may not always be accurate.
-                </p>
-            </div>
-        </div>
+                <div>
+                    <CardTitle className="text-xl sm:text-2xl">Your Personal AI Advisor</CardTitle>
+                    <CardDescription>Get a personalized money-saving tip.</CardDescription>
+                </div>
+            </CardHeader>
+            <CardContent className="p-6">
+                <div className="text-center flex flex-col justify-center items-center min-h-[180px] gap-4">
+                    {loading ? (
+                        <>
+                            <p className="text-muted-foreground animate-pulse">Analyzing your habits...</p>
+                            <Skeleton className="h-6 w-11/12 mx-auto" />
+                            <Skeleton className="h-6 w-3/4 mx-auto" />
+                        </>
+                    ) : advice ? (
+                        <motion.div 
+                            initial={{ opacity: 0, y: 10 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            className="bg-accent/50 p-6 rounded-lg border-l-4 border-primary text-left w-full"
+                        >
+                            <p className="text-lg font-medium text-foreground/90">
+                                <Lightbulb className="inline-block mr-3 -mt-1 h-5 w-5 text-primary" />
+                                {advice}
+                            </p>
+                        </motion.div>
+                    ) : (
+                        <>
+                            <Sparkles className="mx-auto h-10 w-10 text-muted-foreground" />
+                            <div className="space-y-1">
+                                <h3 className="text-lg font-medium">Ready for some advice?</h3>
+                                <p className="text-sm text-muted-foreground max-w-xs mx-auto">Click below to let our AI analyze your spending and give you a personalized tip.</p>
+                            </div>
+                        </>
+                    )}
+                </div>
+                 <div className="mt-6 flex justify-center">
+                    <Button onClick={handleGetAdvice} disabled={loading} size="lg">
+                        {loading ? "Thinking..." : "💡 Get Smart Tip"}
+                    </Button>
+                </div>
+            </CardContent>
+        </Card>
     );
 }
 
@@ -1052,6 +1044,7 @@ function ForecastView({ currencySymbol }: { currencySymbol: string }) {
 
 
     
+
 
 
 
