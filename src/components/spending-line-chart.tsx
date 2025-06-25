@@ -63,7 +63,7 @@ export function SpendingLineChart({ spendings, currencySymbol }: SpendingLineCha
             top: 5,
             right: 20,
             left: 10,
-            bottom: 20,
+            bottom: 40,
           }}
         >
           <CartesianGrid vertical={false} />
