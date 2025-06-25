@@ -114,13 +114,12 @@ export const StoreProvider = ({ children }: { children: ReactNode }) => {
         <div className="flex min-h-screen w-full flex-col items-center justify-center bg-background gap-4">
             <motion.div
                 animate={{
-                    scale: [1, 1.05, 1],
-                    opacity: [0.8, 1, 0.8],
+                    y: [0, -15, 0],
                 }}
                 transition={{
                     duration: 2,
+                    ease: "easeInOut",
                     repeat: Infinity,
-                    repeatType: "loop",
                 }}
             >
                 <StuSaveLogo size={96} />
