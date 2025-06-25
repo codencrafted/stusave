@@ -33,6 +33,7 @@ import { CATEGORIES, findCategoryEmoji, CURRENCIES, findCurrencySymbol, findCate
 import type { Category, Spending, Currency, CreditDebitRecord, LendBorrowStatus, LendBorrowType } from '@/lib/types';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Badge } from '@/components/ui/badge';
+import { WelcomeSetup } from '@/components/welcome-setup';
 
 const spendingSchema = z.object({
   amount: z.coerce.number().positive("Amount must be positive"),
@@ -54,7 +55,17 @@ const lendBorrowSchema = z.object({
   date: z.string().min(1, "Date is required"),
 });
 
-export default function StuSaveApp() {
+export default function OnboardingRouter() {
+  const { state } = useStore();
+
+  if (!state.isSetupComplete) {
+    return <WelcomeSetup />;
+  }
+
+  return <StuSaveApp />;
+}
+
+function StuSaveApp() {
   const { state, dispatch } = useStore();
   const { toast } = useToast();
   const [isAddSpendingOpen, setAddSpendingOpen] = useState(false);
@@ -87,6 +98,10 @@ export default function StuSaveApp() {
     resolver: zodResolver(financesSchema),
     defaultValues: { income: state.income, budget: state.budget },
   });
+
+  useEffect(() => {
+    financesForm.reset({ income: state.income, budget: state.budget });
+  }, [state.income, state.budget, financesForm]);
 
   // Calculations
   const totalExpenses = useMemo(() => state.spendings.reduce((sum, t) => sum + t.amount, 0), [state.spendings]);
@@ -166,6 +181,10 @@ export default function StuSaveApp() {
       <Tabs value={activeTab} onValueChange={setActiveTab} className="relative min-h-screen w-full">
         <main className="w-full max-w-4xl mx-auto px-4 pt-8 pb-28 sm:pb-24">
           <TabsContent value="dashboard">
+            <div className="mb-8">
+              <h1 className="text-2xl md:text-3xl font-bold font-headline">Welcome back, {state.name}!</h1>
+              <p className="text-muted-foreground">Here's your financial overview for today.</p>
+            </div>
             <div className="grid gap-6 md:grid-cols-2">
                {pendingDebts.length > 0 && (
                 <Card className="md:col-span-2 bg-destructive/10 border-destructive/20">
@@ -996,4 +1015,5 @@ function ForecastView({ currencySymbol }: { currencySymbol: string }) {
 
 
     
+
 

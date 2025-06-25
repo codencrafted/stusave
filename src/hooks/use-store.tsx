@@ -4,11 +4,13 @@ import React, { createContext, useContext, useReducer, useEffect, type ReactNode
 import type { Spending, Currency, CreditDebitRecord, LendBorrowStatus } from '@/lib/types';
 
 interface StoreState {
+  name: string;
   income: number;
   budget: number;
   spendings: Spending[];
   currency: Currency;
   lendBorrow: CreditDebitRecord[];
+  isSetupComplete: boolean;
 }
 
 type Action =
@@ -19,15 +21,18 @@ type Action =
   | { type: 'ADD_LEND_BORROW'; payload: CreditDebitRecord }
   | { type: 'UPDATE_LEND_BORROW_STATUS'; payload: { id: string; status: LendBorrowStatus } }
   | { type: 'DELETE_LEND_BORROW'; payload: string }
+  | { type: 'COMPLETE_SETUP'; payload: { name: string; income: number; budget: number } }
   | { type: 'RESET_DATA' }
   | { type: 'HYDRATE'; payload: Partial<StoreState> };
 
 const initialState: StoreState = {
-  income: 5000,
-  budget: 3000,
+  name: '',
+  income: 0,
+  budget: 0,
   spendings: [],
   currency: 'INR',
   lendBorrow: [],
+  isSetupComplete: false,
 };
 
 const storeReducer = (state: StoreState, action: Action): StoreState => {
@@ -53,10 +58,19 @@ const storeReducer = (state: StoreState, action: Action): StoreState => {
       };
     case 'DELETE_LEND_BORROW':
       return { ...state, lendBorrow: state.lendBorrow.filter(r => r.id !== action.payload) };
+    case 'COMPLETE_SETUP':
+      return {
+        ...state,
+        name: action.payload.name,
+        income: action.payload.income,
+        budget: action.payload.budget,
+        isSetupComplete: true,
+      };
     case 'RESET_DATA':
-      return initialState;
+      return { ...initialState, isSetupComplete: false };
     case 'HYDRATE':
-      return { ...state, ...action.payload };
+       // For existing users, if isSetupComplete is not in their stored data, default to true.
+      return { ...initialState, ...action.payload, isSetupComplete: action.payload.isSetupComplete ?? true };
     default:
       return state;
   }
@@ -93,7 +107,7 @@ export const StoreProvider = ({ children }: { children: ReactNode }) => {
   }, [state, isHydrated]);
 
   if (!isHydrated) {
-    return null; // or a loading spinner
+    return <div className="flex min-h-screen w-full items-center justify-center bg-background"><p>Loading StuSave...</p></div>;
   }
 
   return (
