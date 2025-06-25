@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import dynamic from 'next/dynamic';
 import { useStore } from '@/hooks/use-store';
 import { useToast } from '@/hooks/use-toast';
@@ -41,57 +41,109 @@ export function TransferDataDialog() {
   const [isOpen, setOpen] = useState(false);
   const [view, setView] = useState<'options' | 'generate' | 'scan'>('options');
   const [scannedData, setScannedData] = useState<string | null>(null);
+  const [qrCodeValue, setQrCodeValue] = useState('');
+  const [isGenerating, setIsGenerating] = useState(false);
   const isProcessing = useRef(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const handleScanResult = (result: any) => {
+  useEffect(() => {
+    if (view === 'generate' && isOpen) {
+        const generateCode = async () => {
+            setIsGenerating(true);
+            setQrCodeValue('');
+            try {
+                const response = await fetch('/api/transfer', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(state),
+                });
+                if (!response.ok) {
+                    throw new Error('Failed to generate code from server.');
+                }
+                const { id } = await response.json();
+                
+                const transferUrl = new URL(window.location.origin);
+                transferUrl.searchParams.set('id', id);
+                setQrCodeValue(transferUrl.toString());
+
+            } catch (error) {
+                console.error(error);
+                toast({
+                    variant: 'destructive',
+                    title: 'Error Generating Code',
+                    description: 'Could not generate a transfer code. Please try again.',
+                });
+                setView('options');
+            } finally {
+                setIsGenerating(false);
+            }
+        };
+        generateCode();
+    }
+  }, [view, isOpen, state, toast]);
+
+  const handleScanResult = async (result: any) => {
     if (isProcessing.current) return;
 
     if (result) {
       isProcessing.current = true;
       const text = result.getText();
+
       try {
-        const parsed = JSON.parse(text);
-        if ('spendings' in parsed && 'budget' in parsed) {
-          setScannedData(text);
+        const url = new URL(text);
+        const id = url.searchParams.get('id');
+
+        if (!id) {
+          throw new Error("QR code does not contain a valid transfer ID.");
+        }
+
+        const response = await fetch(`/api/transfer?id=${id}`);
+        
+        if (!response.ok) {
+          const errorData = await response.json();
+          throw new Error(errorData.error || "Invalid or expired code.");
+        }
+        
+        const data = await response.json();
+
+        if ('spendings' in data && 'budget' in data) {
+          setScannedData(JSON.stringify(data));
           setOpen(false);
         } else {
-           throw new Error("Invalid data structure");
+          throw new Error("Received data is not in the correct format.");
         }
-      } catch (e) {
-        isProcessing.current = false;
+      } catch (e: any) {
         toast({
           variant: 'destructive',
-          title: 'Invalid QR Code',
-          description: 'The scanned QR code does not contain valid StuSave data.',
+          title: 'Transfer Failed',
+          description: e.message || 'The scanned QR code is invalid.',
         });
         setView('options');
+        isProcessing.current = false;
       }
     }
   };
 
   const handleImageUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
-    if (isProcessing.current) return;
-
     const file = event.target.files?.[0];
     if (!file) return;
     
+    if (isProcessing.current) return;
+    isProcessing.current = true;
+
     const reader = new BrowserQRCodeReader();
     const imageUrl = URL.createObjectURL(file);
     
     try {
-      // Set processing lock here to avoid race conditions with camera
-      isProcessing.current = true;
       const result = await reader.decodeFromImageUrl(imageUrl);
-      handleScanResult(result);
+      await handleScanResult(result);
     } catch (err) {
       console.error("QR Code decoding from image failed", err);
       toast({
         variant: 'destructive',
         title: 'Scan Failed',
-        description: 'No QR code could be found in the selected image.',
+        description: 'No valid QR code could be found in the selected image.',
       });
-      // Release lock only on failure
       isProcessing.current = false; 
     } finally {
       URL.revokeObjectURL(imageUrl);
@@ -125,12 +177,14 @@ export function TransferDataDialog() {
     isProcessing.current = false;
   }
 
-  const stringifiedState = JSON.stringify(state);
-
   const handleOpenChange = (open: boolean) => {
     setOpen(open);
     if (!open) {
-      setTimeout(() => setView('options'), 200);
+      setTimeout(() => {
+        setView('options');
+        setQrCodeValue('');
+        isProcessing.current = false;
+      }, 200);
     }
   }
 
@@ -181,9 +235,17 @@ export function TransferDataDialog() {
 
             {view === 'generate' && (
               <div className="flex flex-col items-center gap-4">
-                <div className="p-4 bg-white rounded-lg">
-                    <QRCode value={stringifiedState} size={256} style={{ height: "auto", maxWidth: "100%", width: "100%" }}/>
-                </div>
+                {isGenerating && (
+                    <div className="flex flex-col items-center justify-center p-4 h-[304px] w-[288px]">
+                        <Skeleton className="h-[256px] w-[256px]" />
+                        <p className="mt-4 text-sm text-muted-foreground">Generating secure code...</p>
+                    </div>
+                )}
+                {!isGenerating && qrCodeValue && (
+                    <div className="p-4 bg-white rounded-lg">
+                        <QRCode value={qrCodeValue} size={256} style={{ height: "auto", maxWidth: "100%", width: "100%" }}/>
+                    </div>
+                )}
               </div>
             )}
 
