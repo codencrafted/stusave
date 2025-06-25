@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import dynamic from 'next/dynamic';
 import { useStore } from '@/hooks/use-store';
 import { useToast } from '@/hooks/use-toast';
@@ -40,20 +40,24 @@ export function TransferDataDialog() {
   const [isOpen, setOpen] = useState(false);
   const [view, setView] = useState<'options' | 'generate' | 'scan'>('options');
   const [scannedData, setScannedData] = useState<string | null>(null);
+  const isProcessing = useRef(false);
 
   const handleScanResult = (result: any) => {
+    if (isProcessing.current) return;
+
     if (result) {
+      isProcessing.current = true;
       const text = result.getText();
       try {
-        // Basic validation that it's our app's data by checking for a key
         const parsed = JSON.parse(text);
         if ('spendings' in parsed && 'budget' in parsed) {
           setScannedData(text);
-          setOpen(false); // Close main dialog, confirmation will open
+          setOpen(false);
         } else {
            throw new Error("Invalid data structure");
         }
       } catch (e) {
+        isProcessing.current = false;
         toast({
           variant: 'destructive',
           title: 'Invalid QR Code',
@@ -70,23 +74,29 @@ export function TransferDataDialog() {
         const newState = JSON.parse(scannedData);
         dispatch({ type: 'HYDRATE', payload: newState });
         toast({ title: 'Success!', description: 'Data transferred successfully.' });
-        setScannedData(null);
       } catch (e) {
         toast({
           variant: 'destructive',
           title: 'Transfer Failed',
           description: 'Could not apply the new data.',
         });
+      } finally {
+        setScannedData(null);
+        isProcessing.current = false;
       }
     }
   };
+
+  const handleCancelTransfer = () => {
+    setScannedData(null);
+    isProcessing.current = false;
+  }
 
   const stringifiedState = JSON.stringify(state);
 
   const handleOpenChange = (open: boolean) => {
     setOpen(open);
     if (!open) {
-      // Reset view when dialog is closed
       setTimeout(() => setView('options'), 200);
     }
   }
@@ -167,7 +177,7 @@ export function TransferDataDialog() {
         </DialogContent>
       </Dialog>
 
-      <AlertDialog open={!!scannedData} onOpenChange={(open) => {if(!open) setScannedData(null)}}>
+      <AlertDialog open={!!scannedData} onOpenChange={(open) => {if(!open) handleCancelTransfer()}}>
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>Confirm Data Transfer</AlertDialogTitle>
@@ -176,7 +186,7 @@ export function TransferDataDialog() {
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogCancel onClick={handleCancelTransfer}>Cancel</AlertDialogCancel>
             <AlertDialogAction onClick={handleConfirmTransfer}>Yes, Transfer Data</AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
