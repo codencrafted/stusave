@@ -59,6 +59,21 @@ export default function StuSaveApp() {
   const { toast } = useToast();
   const [isAddSpendingOpen, setAddSpendingOpen] = useState(false);
   const [activeTab, setActiveTab] = useState('dashboard');
+  const [isMounted, setIsMounted] = useState(false);
+
+  useEffect(() => {
+    const savedTab = localStorage.getItem('stusave-active-tab');
+    if (savedTab) {
+      setActiveTab(savedTab);
+    }
+    setIsMounted(true);
+  }, []);
+
+  useEffect(() => {
+    if (isMounted) {
+      localStorage.setItem('stusave-active-tab', activeTab);
+    }
+  }, [activeTab, isMounted]);
 
   const currencySymbol = useMemo(() => findCurrencySymbol(state.currency), [state.currency]);
 
@@ -981,3 +996,4 @@ function ForecastView({ currencySymbol }: { currencySymbol: string }) {
 
 
     
+
