@@ -48,13 +48,13 @@ export async function GET(request: NextRequest) {
 
     const record = transferStore.get(id);
 
-    // Check if the record exists and if it has expired.
-    if (!record || Date.now() > record.expires) {
-        // If the record exists but is expired, delete it.
-        if (record) {
-            transferStore.delete(id);
-        }
-        return NextResponse.json({ error: 'Data not found. It may have expired.' }, { status: 404 });
+    if (!record) {
+        return NextResponse.json({ error: 'Data not found or already used. Please generate a new QR code.' }, { status: 404 });
+    }
+    
+    if (Date.now() > record.expires) {
+        transferStore.delete(id); // Clean up expired record
+        return NextResponse.json({ error: 'The QR code has expired. Please generate a new one.' }, { status: 410 }); // 410 Gone
     }
     
     // The data has been retrieved, so we delete it for secure, one-time use.

@@ -3,13 +3,19 @@ type TransferRecord = {
     expires: number;
 };
 
-// Use a global object to persist the map across hot-reloads in development.
-// This is not suitable for a production serverless environment where a distributed
-// cache (e.g., Redis) or database should be used.
 declare global {
-  var transferStore: Map<string, TransferRecord> | undefined
+  // We use `var` here because `let` or `const` would not be re-declarable.
+  // This is necessary for the global object to persist across hot-reloads in development.
+  // eslint-disable-next-line no-var
+  var transferStore: Map<string, TransferRecord> | undefined;
 }
 
-const transferStore = global.transferStore || (global.transferStore = new Map());
+// This check prevents the store from being reset during hot-reloads in development
+// by ensuring that it's only initialized once.
+if (!global.transferStore) {
+  global.transferStore = new Map();
+}
+
+const transferStore = global.transferStore;
 
 export default transferStore;
