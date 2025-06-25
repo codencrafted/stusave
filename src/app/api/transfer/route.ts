@@ -46,17 +46,14 @@ export async function GET(request: NextRequest) {
         return NextResponse.json({ error: 'An ID is required.' }, { status: 400 });
     }
 
-    // Lazily clean up expired records. This is more reliable than setInterval in a serverless environment.
-    const now = Date.now();
-    for (const [key, { expires }] of transferStore.entries()) {
-        if (now > expires) {
-            transferStore.delete(key);
-        }
-    }
-
     const record = transferStore.get(id);
 
-    if (!record) {
+    // Check if the record exists and if it has expired.
+    if (!record || Date.now() > record.expires) {
+        // If the record exists but is expired, delete it.
+        if (record) {
+            transferStore.delete(id);
+        }
         return NextResponse.json({ error: 'Data not found. It may have expired.' }, { status: 404 });
     }
     
