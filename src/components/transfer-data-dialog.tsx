@@ -45,6 +45,16 @@ export function TransferDataDialog() {
   const [isGenerating, setIsGenerating] = useState(false);
   const isProcessing = useRef(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const [isScanning, setIsScanning] = useState(false);
+
+  useEffect(() => {
+    // This effect ensures that scanning is only active when the scan view is visible.
+    if (view === 'scan' && isOpen) {
+      setIsScanning(true);
+    } else {
+      setIsScanning(false);
+    }
+  }, [view, isOpen]);
 
   useEffect(() => {
     if (view === 'generate' && isOpen) {
@@ -86,6 +96,7 @@ export function TransferDataDialog() {
     if (isProcessing.current) return;
 
     if (result) {
+      setIsScanning(false); // Stop the scanner immediately to prevent re-scans.
       isProcessing.current = true;
       const text = result.getText();
 
@@ -264,6 +275,7 @@ export function TransferDataDialog() {
                         setView('options');
                       }
                     }}
+                    isScanning={isScanning}
                   />
                 </div>
                  <p className="text-sm text-muted-foreground">or</p>
