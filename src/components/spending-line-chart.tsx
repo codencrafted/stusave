@@ -54,7 +54,7 @@ export function SpendingLineChart({ spendings, currencySymbol }: SpendingLineCha
   }
 
   return (
-    <div className="h-[250px] w-full">
+    <div className="h-[300px] w-full">
       <ChartContainer config={chartConfig}>
         <LineChart
           accessibilityLayer
