@@ -28,7 +28,7 @@ export async function POST(request: NextRequest) {
         transferStore.set(id, { data, expires });
         
         return NextResponse.json({ id });
-    } catch (error) => {
+    } catch (error) {
         console.error('API Error (POST /api/transfer):', error);
         return NextResponse.json({ error: 'Failed to process request' }, { status: 500 });
     }
