@@ -28,6 +28,7 @@ import { useToast } from '@/hooks/use-toast';
 import { CategoryPieChart } from '@/components/category-pie-chart';
 import { SpendingLineChart } from '@/components/spending-line-chart';
 import { ThemeToggle } from '@/components/theme-toggle';
+import { TransferDataDialog } from '@/components/transfer-data-dialog';
 import { CATEGORIES, findCategoryEmoji, CURRENCIES, findCurrencySymbol, findCategoryIcon } from '@/lib/constants';
 import type { Category, Spending, Currency, CreditDebitRecord, LendBorrowStatus, LendBorrowType } from '@/lib/types';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -316,6 +317,7 @@ export default function StuSaveApp() {
                             </SelectContent>
                         </Select>
                     </div>
+                    <TransferDataDialog />
                      <div className="flex items-center justify-between p-4 rounded-lg border">
                         <div>
                             <Label>Export Data</Label>
@@ -850,10 +852,9 @@ function AdvisorView({ currencySymbol }: { currencySymbol: string }) {
                 <Button onClick={handleGetAdvice} disabled={loading} size="lg">
                     {loading ? "Thinking..." : "💡 Get Smart Tip"}
                 </Button>
-                <div className="text-xs text-muted-foreground mt-4 text-center">
-                    <p>Powered by Gemini AI.</p>
-                    <p>Advice is generated and may not always be accurate.</p>
-                </div>
+                 <p className="text-xs text-muted-foreground mt-4 text-center">
+                    Powered by Gemini AI. Advice is generated and may not always be accurate.
+                </p>
             </CardFooter>
         </Card>
     );
@@ -910,7 +911,7 @@ function ForecastView({ currencySymbol }: { currencySymbol: string }) {
                 </div>
             </CardHeader>
             <CardContent className="p-6">
-                <div className="text-center flex flex-col justify-center items-center min-h-[240px] gap-4">
+                <div className="text-center flex flex-col justify-center items-center min-h-[180px] gap-4">
                     {loading ? (
                         <>
                             <p className="text-muted-foreground animate-pulse">Analyzing your spending habits...</p>
@@ -919,7 +920,7 @@ function ForecastView({ currencySymbol }: { currencySymbol: string }) {
                         </>
                     ) : error ? (
                         <>
-                            <div className="text-destructive-foreground bg-destructive/90 p-4 rounded-md w-full">
+                            <div className="text-destructive-foreground bg-destructive/90 p-4 rounded-md w-full text-center">
                                 <p className="font-semibold">Oops!</p>
                                 <p className="text-sm">{error}</p>
                             </div>
@@ -932,13 +933,13 @@ function ForecastView({ currencySymbol }: { currencySymbol: string }) {
                             <motion.div
                                 initial={{ opacity: 0, scale: 0.95 }}
                                 animate={{ opacity: 1, scale: 1 }}
-                                className="w-full bg-accent/50 p-6 rounded-lg border"
+                                className="w-full bg-accent/50 p-6 rounded-lg border text-center"
                             >
                                 <p className="text-sm text-muted-foreground">Forecast for tomorrow:</p>
                                 <p className="text-3xl sm:text-4xl font-bold text-primary">{currencySymbol}{prediction.predictedAmount.toFixed(2)}</p>
                                 <p className="text-sm text-muted-foreground mt-2 max-w-xs mx-auto italic">"{prediction.reasoning}"</p>
                             </motion.div>
-                             <Button onClick={handleGetPrediction} disabled={loading} variant="secondary">
+                             <Button onClick={handleGetPrediction} disabled={loading} variant="secondary" size="sm">
                                 <Sparkles className="mr-2 h-4 w-4" /> Re-predict
                             </Button>
                         </>
