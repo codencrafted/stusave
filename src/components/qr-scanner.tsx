@@ -15,13 +15,12 @@ export function Scanner({
 
   useEffect(() => {
     const reader = new BrowserMultiFormatReader();
-    let controls: any;
 
     const startScanner = async () => {
       try {
         if (!videoRef.current) return;
         // This will request camera access
-        controls = await reader.decodeFromVideoDevice(undefined, videoRef.current, (result, error) => {
+        await reader.decodeFromVideoDevice(undefined, videoRef.current, (result, error) => {
           if (result) {
             onResult(result);
           }
@@ -41,9 +40,10 @@ export function Scanner({
 
     // Cleanup function to stop the scanner
     return () => {
-      if (controls) {
-        controls.stop();
-      }
+        // Using reader.reset() is a more robust way to stop the scanner and release the camera.
+        // It ensures that the media stream is stopped even if the component unmounts before
+        // the scanner is fully initialized.
+        reader.reset();
     };
   }, [onResult, onError]);
 
