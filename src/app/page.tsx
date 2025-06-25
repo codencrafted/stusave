@@ -104,9 +104,6 @@ function StuSaveApp() {
   }, [state.income, state.budget, financesForm]);
 
   // Calculations
-  const totalExpenses = useMemo(() => state.spendings.reduce((sum, t) => sum + t.amount, 0), [state.spendings]);
-  const balance = useMemo(() => state.income - totalExpenses, [state.income, totalExpenses]);
-  
   const monthlyExpenses = useMemo(() => {
     const start = startOfMonth(new Date());
     const end = new Date();
@@ -183,7 +180,7 @@ function StuSaveApp() {
           <TabsContent value="dashboard">
             <div className="mb-8">
               <h1 className="text-2xl md:text-3xl font-bold font-headline">Welcome back, {state.name}!</h1>
-              <p className="text-muted-foreground">Here's your financial overview for today.</p>
+              <p className="text-muted-foreground">Here's your financial overview for this month.</p>
             </div>
             <div className="grid gap-6 md:grid-cols-2">
                {pendingDebts.length > 0 && (
@@ -204,25 +201,85 @@ function StuSaveApp() {
                   </CardContent>
                 </Card>
               )}
+              
               <Card>
                 <CardHeader>
-                  <CardTitle>Balance</CardTitle>
-                  <CardDescription>Income - Total Expenses</CardDescription>
+                  <CardTitle>Monthly Budget Status</CardTitle>
+                  <CardDescription>You have <span className={`font-bold ${budgetRemaining < 0 ? 'text-destructive' : 'text-primary'}`}>{currencySymbol}{budgetRemaining.toFixed(2)}</span> left to spend.</CardDescription>
                 </CardHeader>
-                <CardContent>
-                  <p className="text-4xl font-bold flex items-center"><span className="mr-2 text-3xl">{currencySymbol}</span>{balance.toFixed(2)}</p>
+                <CardContent className="space-y-2">
+                  <Progress value={budgetProgress} className="h-3" />
+                  <div className="flex justify-between text-sm font-medium text-muted-foreground">
+                    <span>{currencySymbol}{monthlyExpenses.toFixed(2)} Spent</span>
+                    <span className="text-foreground">Budget: {currencySymbol}{state.budget.toFixed(2)}</span>
+                  </div>
                 </CardContent>
+                {budgetRemaining < 0 && (
+                  <CardFooter className="py-0 pb-4">
+                      <p className="text-sm text-destructive font-semibold">⚠️ You've gone over your budget!</p>
+                  </CardFooter>
+                )}
               </Card>
-               <Card>
+
+              <Card>
                 <CardHeader>
-                  <CardTitle>This Month's Budget</CardTitle>
-                  <CardDescription>You've spent {currencySymbol}{monthlyExpenses.toFixed(2)} so far.</CardDescription>
+                  <CardTitle>This Month's Flow</CardTitle>
+                  <CardDescription>Your income vs. expenses.</CardDescription>
                 </CardHeader>
-                <CardContent>
-                    <p className={`text-3xl font-bold flex items-center ${budgetRemaining < 0 ? 'text-destructive' : ''}`}><span className="mr-2 text-2xl">{currencySymbol}</span>{budgetRemaining.toFixed(2)} left</p>
-                    <Progress value={budgetProgress} className="mt-4 h-3" />
+                <CardContent className="space-y-4">
+                  <div className="flex items-center gap-3">
+                    <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-green-500/10">
+                      <ArrowUpRight className="h-5 w-5 text-green-500" />
+                    </div>
+                    <div>
+                      <p className="text-sm text-muted-foreground">Income</p>
+                      <p className="font-semibold text-lg">{currencySymbol}{state.income.toFixed(2)}</p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-red-500/10">
+                      <ArrowDownLeft className="h-5 w-5 text-red-500" />
+                    </div>
+                    <div>
+                      <p className="text-sm text-muted-foreground">Expenses</p>
+                      <p className="font-semibold text-lg">{currencySymbol}{monthlyExpenses.toFixed(2)}</p>
+                    </div>
+                  </div>
                 </CardContent>
               </Card>
+              
+              <Card className="md:col-span-2">
+                <CardHeader>
+                    <CardTitle>Lend & Borrow Summary</CardTitle>
+                    <CardDescription>Your current pending balances with friends.</CardDescription>
+                </CardHeader>
+                <CardContent className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                    <div className="flex items-center gap-4 rounded-lg border p-4">
+                        <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-green-500/10"><ArrowUpRight className="text-green-500"/></div>
+                        <div>
+                          <p className="text-sm text-muted-foreground">You Lent</p>
+                          <p className="font-semibold text-lg">{currencySymbol}{totalLent.toFixed(2)}</p>
+                        </div>
+                    </div>
+                    <div className="flex items-center gap-4 rounded-lg border p-4">
+                        <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-red-500/10"><ArrowDownLeft className="text-red-500"/></div>
+                        <div>
+                          <p className="text-sm text-muted-foreground">You Borrowed</p>
+                          <p className="font-semibold text-lg">{currencySymbol}{totalBorrowed.toFixed(2)}</p>
+                        </div>
+                    </div>
+                    <div className="flex items-center gap-4 rounded-lg border p-4">
+                        <div className={`flex h-10 w-10 items-center justify-center rounded-lg ${netCreditDebit >= 0 ? 'bg-primary/10' : 'bg-destructive/10'}`}>
+                          <Wallet className={`${netCreditDebit >= 0 ? 'text-primary' : 'text-destructive'}`}/>
+                        </div>
+                        <div>
+                          <p className="text-sm text-muted-foreground">Net Balance</p>
+                          <p className={`font-semibold text-lg ${netCreditDebit >= 0 ? 'text-primary' : 'text-destructive'}`}>{netCreditDebit >= 0 ? '+' : '-'}{currencySymbol}{Math.abs(netCreditDebit).toFixed(2)}</p>
+                        </div>
+                    </div>
+                </CardContent>
+              </Card>
+
               <Card className="md:col-span-2">
                 <CardHeader>
                   <CardTitle>Spending Breakdown</CardTitle>
@@ -230,26 +287,6 @@ function StuSaveApp() {
                 </CardHeader>
                 <CardContent>
                   <CategoryPieChart spendings={state.spendings.filter(t => isWithinInterval(new Date(t.date), { start: startOfMonth(new Date()), end: new Date() }))} />
-                </CardContent>
-              </Card>
-              <Card className="md:col-span-2">
-                <CardHeader>
-                  <CardTitle>Lend/Borrow Summary</CardTitle>
-                  <CardDescription>Your current pending balances with friends.</CardDescription>
-                </CardHeader>
-                <CardContent className="grid grid-cols-1 md:grid-cols-3 gap-4 text-center">
-                    <div>
-                        <p className="text-sm text-muted-foreground">You Lent (Pending)</p>
-                        <p className="text-2xl font-bold text-green-600">{currencySymbol}{totalLent.toFixed(2)}</p>
-                    </div>
-                    <div>
-                        <p className="text-sm text-muted-foreground">You Borrowed (Pending)</p>
-                        <p className="text-2xl font-bold text-red-600">{currencySymbol}{totalBorrowed.toFixed(2)}</p>
-                    </div>
-                     <div>
-                        <p className="text-sm text-muted-foreground">Net Balance</p>
-                        <p className={`text-2xl font-bold ${netCreditDebit >= 0 ? 'text-green-600' : 'text-red-600'}`}>{currencySymbol}{Math.abs(netCreditDebit).toFixed(2)}</p>
-                    </div>
                 </CardContent>
               </Card>
             </div>
@@ -1015,5 +1052,6 @@ function ForecastView({ currencySymbol }: { currencySymbol: string }) {
 
 
     
+
 
 
