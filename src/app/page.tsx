@@ -872,62 +872,62 @@ function AdvisorView({ currencySymbol }: { currencySymbol: string }) {
     };
 
     return (
-        <Card className="overflow-hidden">
-            <CardHeader className="bg-muted/30">
-                <div className="flex items-center gap-4">
-                    <div className="bg-primary/10 text-primary p-3 rounded-full">
-                       <Sparkles size={24} />
-                    </div>
-                    <div>
-                        <CardTitle className="font-headline">AI Money Advisor</CardTitle>
-                        <CardDescription>Get smart money-saving tips based on your spending.</CardDescription>
-                    </div>
+        <div className="flex flex-col items-center justify-start text-center py-8 px-4">
+            <div className="w-full max-w-lg mb-10 text-center">
+                 <div className="inline-block bg-primary/10 text-primary p-4 rounded-full mb-4">
+                    <Sparkles size={32} />
                 </div>
-            </CardHeader>
-            <CardContent className="p-6 text-center">
-                 <div className="flex flex-col items-center justify-center min-h-[250px]">
-                    {loading && (
-                        <div className="space-y-4 animate-in fade-in-0">
-                           <p className="text-muted-foreground">Generating your smart tip...</p>
-                           <Skeleton className="h-8 w-64 mx-auto" />
-                           <Skeleton className="h-8 w-48 mx-auto" />
-                        </div>
-                    )}
+                <h1 className="text-3xl md:text-4xl font-bold font-headline mb-2">Your Personal AI Advisor</h1>
+                <p className="text-lg text-muted-foreground">
+                    Get smart, actionable money-saving tips based on your spending.
+                </p>
+            </div>
 
-                    {!loading && advice && (
-                        <motion.div 
-                            initial={{ opacity: 0, scale: 0.95 }}
-                            animate={{ opacity: 1, scale: 1 }}
-                            transition={{ duration: 0.5 }}
-                            className="bg-primary/10 border-l-4 border-primary p-6 rounded-lg text-left w-full"
-                        >
-                            <p className="text-xl font-medium font-headline text-primary-foreground/90">
-                                {advice}
-                            </p>
-                        </motion.div>
-                    )}
+            <div className="w-full max-w-xl min-h-[150px] flex flex-col items-center justify-center mb-10">
+                {loading && (
+                    <div className="space-y-4 animate-in fade-in-0 w-full text-center">
+                       <p className="text-muted-foreground animate-pulse">Analyzing your habits...</p>
+                       <Skeleton className="h-8 w-11/12 mx-auto" />
+                       <Skeleton className="h-8 w-3/4 mx-auto" />
+                    </div>
+                )}
 
-                    {!loading && !advice && (
-                        <div className="text-center space-y-3 animate-in fade-in-0">
-                            <Lightbulb className="mx-auto h-12 w-12 text-muted-foreground" />
-                            <h3 className="text-lg font-semibold">Ready for some advice?</h3>
-                            <p className="text-muted-foreground max-w-sm mx-auto">
-                                Click the button below to let our AI analyze your spending and give you a personalized money-saving tip.
-                            </p>
-                        </div>
-                    )}
-                </div>
+                {!loading && advice && (
+                    <motion.div 
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.5, ease: "easeOut" }}
+                        className="bg-accent/50 border-l-4 border-primary p-6 rounded-lg text-left w-full shadow-lg"
+                    >
+                        <p className="text-xl font-medium text-foreground/90">
+                            <Lightbulb className="inline-block mr-3 -mt-1 h-6 w-6 text-primary" />
+                            {advice}
+                        </p>
+                    </motion.div>
+                )}
 
-            </CardContent>
-            <CardFooter className="flex-col items-center justify-center border-t pt-6">
-                <Button onClick={handleGetAdvice} disabled={loading} size="lg">
+                {!loading && !advice && (
+                    <motion.div 
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        className="text-center space-y-3 animate-in fade-in-0"
+                    >
+                        <p className="text-muted-foreground max-w-sm mx-auto">
+                            Ready for some advice? Click the button below to let our AI analyze your spending and give you a personalized tip.
+                        </p>
+                    </motion.div>
+                )}
+            </div>
+
+            <div className="w-full max-w-sm">
+                <Button onClick={handleGetAdvice} disabled={loading} size="lg" className="w-full h-14 text-lg shadow-lg hover:shadow-primary/40 transition-shadow">
                     {loading ? "Thinking..." : "💡 Get Smart Tip"}
                 </Button>
-                 <p className="text-xs text-muted-foreground mt-4 text-center">
+                <p className="text-xs text-muted-foreground mt-4 text-center">
                     Powered by Gemini AI. Advice is generated and may not always be accurate.
                 </p>
-            </CardFooter>
-        </Card>
+            </div>
+        </div>
     );
 }
 
@@ -1052,6 +1052,7 @@ function ForecastView({ currencySymbol }: { currencySymbol: string }) {
 
 
     
+
 
 
 
