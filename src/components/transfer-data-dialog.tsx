@@ -29,7 +29,7 @@ import { Label } from '@/components/ui/label';
 import { ArrowLeft, QrCode, ScanLine } from 'lucide-react';
 import { Skeleton } from './ui/skeleton';
 
-const Scanner = dynamic(() => import('react-zxing').then(mod => mod.Scanner), {
+const Scanner = dynamic(() => import('react-zxing'), {
   ssr: false,
   loading: () => <Skeleton className="w-full h-full" />,
 });
