@@ -61,9 +61,9 @@ export function SpendingLineChart({ spendings, currencySymbol }: SpendingLineCha
           data={chartData}
           margin={{
             top: 5,
-            right: 10,
+            right: 20,
             left: 10,
-            bottom: 5,
+            bottom: 20,
           }}
         >
           <CartesianGrid vertical={false} />
@@ -81,7 +81,14 @@ export function SpendingLineChart({ spendings, currencySymbol }: SpendingLineCha
             fontSize={12}
             tickLine={false}
             axisLine={false}
-            tickFormatter={(value) => `${currencySymbol}${value}`}
+            tickMargin={5}
+            tickFormatter={(value) => {
+                const num = Number(value);
+                if (num >= 1000) {
+                    return `${currencySymbol}${(num / 1000).toFixed(1).replace(/\.0$/, '')}k`;
+                }
+                return `${currencySymbol}${num}`;
+            }}
           />
           <Tooltip
             cursor={false}
