@@ -5,6 +5,7 @@ import dynamic from 'next/dynamic';
 import { useStore } from '@/hooks/use-store';
 import { useToast } from '@/hooks/use-toast';
 import QRCode from 'qrcode.react';
+import { BrowserQRCodeReader } from '@zxing/library';
 
 import { Button } from '@/components/ui/button';
 import {
@@ -26,7 +27,7 @@ import {
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
 import { Label } from '@/components/ui/label';
-import { ArrowLeft, QrCode, ScanLine } from 'lucide-react';
+import { ArrowLeft, QrCode, ScanLine, Upload } from 'lucide-react';
 import { Skeleton } from './ui/skeleton';
 
 const Scanner = dynamic(() => import('@/components/qr-scanner').then(mod => mod.Scanner), {
@@ -41,6 +42,7 @@ export function TransferDataDialog() {
   const [view, setView] = useState<'options' | 'generate' | 'scan'>('options');
   const [scannedData, setScannedData] = useState<string | null>(null);
   const isProcessing = useRef(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleScanResult = (result: any) => {
     if (isProcessing.current) return;
@@ -64,6 +66,37 @@ export function TransferDataDialog() {
           description: 'The scanned QR code does not contain valid StuSave data.',
         });
         setView('options');
+      }
+    }
+  };
+
+  const handleImageUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    if (isProcessing.current) return;
+
+    const file = event.target.files?.[0];
+    if (!file) return;
+    
+    const reader = new BrowserQRCodeReader();
+    const imageUrl = URL.createObjectURL(file);
+    
+    try {
+      // Set processing lock here to avoid race conditions with camera
+      isProcessing.current = true;
+      const result = await reader.decodeFromImageUrl(imageUrl);
+      handleScanResult(result);
+    } catch (err) {
+      console.error("QR Code decoding from image failed", err);
+      toast({
+        variant: 'destructive',
+        title: 'Scan Failed',
+        description: 'No QR code could be found in the selected image.',
+      });
+      // Release lock only on failure
+      isProcessing.current = false; 
+    } finally {
+      URL.revokeObjectURL(imageUrl);
+      if (fileInputRef.current) {
+        fileInputRef.current.value = "";
       }
     }
   };
@@ -127,7 +160,7 @@ export function TransferDataDialog() {
             </DialogTitle>
             <DialogDescription className="text-center">
               {view === 'generate' && 'Have another device scan this code to copy your data.'}
-              {view === 'scan' && 'Point your camera at a StuSave QR code.'}
+              {view === 'scan' && 'Point your camera at a QR code or upload one from your gallery.'}
               {view === 'options' && 'Generate a QR code to send data or scan one to receive it.'}
             </DialogDescription>
           </DialogHeader>
@@ -171,6 +204,24 @@ export function TransferDataDialog() {
                     }}
                   />
                 </div>
+                 <p className="text-sm text-muted-foreground">or</p>
+
+                <input
+                    type="file"
+                    ref={fileInputRef}
+                    onChange={handleImageUpload}
+                    accept="image/*"
+                    className="hidden"
+                    id="qr-upload-input"
+                />
+                <Button
+                    variant="outline"
+                    className="w-full max-w-xs"
+                    onClick={() => fileInputRef.current?.click()}
+                >
+                    <Upload className="mr-2" />
+                    Upload from Gallery
+                </Button>
               </div>
             )}
           </div>
